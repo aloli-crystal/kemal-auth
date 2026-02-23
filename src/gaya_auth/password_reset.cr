@@ -26,7 +26,7 @@ module GayaAuth
     # Vérifie un token de réinitialisation et retourne l'email associé.
     # Lève Token::InvalidTokenError si le token est invalide ou expiré.
     def self.verify_token(token : String, secret : String) : String
-      payload = Token.verify(token, secret)
+      payload = Token.decode(token, secret)
       unless payload.role == "password_reset"
         raise Token::InvalidTokenError.new("Token invalide.")
       end
