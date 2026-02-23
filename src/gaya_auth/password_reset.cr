@@ -13,12 +13,13 @@ module GayaAuth
 
     # Génère un token de réinitialisation JWT.
     def self.generate_token(email : String, secret : String, expiry : Time::Span = DEFAULT_EXPIRY) : String
+      expiry_hours = [1, (expiry.total_hours).ceil.to_i].max
       Token.generate(
         secret: secret,
         sub: email,
         email: email,
         role: "password_reset",
-        expiry: expiry
+        expiry_hours: expiry_hours
       )
     end
 
