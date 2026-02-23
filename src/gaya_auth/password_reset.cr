@@ -1,175 +1,108 @@
+require "email"
 require "./token"
 require "./smtp_config"
-require "email"
 
 module GayaAuth
-  # Gestion de la récupération de mot de passe par courriel.
-  # Génère un token de réinitialisation à durée limitée et envoie
-  # un courriel contenant le lien de réinitialisation via SMTP configurable.
-  #
-  # ```
-  # smtp = GayaAuth::SmtpConfig.new(host: "smtp.example.com", ...)
-  # result = GayaAuth::PasswordReset.send_reset_email(
-  #   email: "admin@gaya.fr",
-  #   reset_url: "https://app.gaya.fr/admin/reset-password",
-  #   secret: "ma_cle_secrete",
-  #   smtp: smtp
-  # )
-  # ```
+  # Module de réinitialisation de mot de passe par courriel.
+  # Génère un token JWT signé à durée limitée et envoie un courriel
+  # avec un lien de réinitialisation.
   module PasswordReset
-    # Durée de validité d'un token de réinitialisation (1 heure)
-    RESET_TOKEN_EXPIRY_HOURS = 1
+    DEFAULT_EXPIRY = 1.hour
 
-    # Résultat d'une opération d'envoi de courriel
-    record SendResult,
-      success : Bool,
-      error : String? do
-      def success? : Bool
-        success
-      end
+    record SendResult, success : Bool, error : String?
+
+    # Génère un token de réinitialisation JWT.
+    def self.generate_token(email : String, secret : String, expiry : Time::Span = DEFAULT_EXPIRY) : String
+      Token.generate(
+        secret: secret,
+        sub: email,
+        email: email,
+        role: "password_reset",
+        expiry: expiry
+      )
     end
 
-    # Génère un token de réinitialisation de mot de passe signé.
-    # Ce token encode l'adresse courriel et expire après 1 heure.
-    #
-    # ```
-    # token = GayaAuth::PasswordReset.generate_token(
-    #   email: "admin@gaya.fr",
-    #   secret: "ma_cle_secrete"
-    # )
-    # ```
-    def self.generate_token(email : String, secret : String) : String
-      raise ArgumentError.new("L'adresse courriel ne peut pas être vide") if email.empty?
-      raise ArgumentError.new("La clé secrète ne peut pas être vide") if secret.empty?
-
-      payload = {
-        "sub"  => email,
-        "type" => "password_reset",
-        "exp"  => (Time.utc + RESET_TOKEN_EXPIRY_HOURS.hours).to_unix,
-        "iat"  => Time.utc.to_unix
-      }
-      JWT.encode(payload, secret, JWT::Algorithm::HS256)
-    end
-
-    # Vérifie un token de réinitialisation et retourne l'adresse courriel associée.
-    # Lève `Token::InvalidTokenError` si le token est invalide ou expiré.
-    #
-    # ```
-    # email = GayaAuth::PasswordReset.verify_token(token, secret: "ma_cle_secrete")
-    # ```
+    # Vérifie un token de réinitialisation et retourne l'email associé.
+    # Lève Token::InvalidTokenError si le token est invalide ou expiré.
     def self.verify_token(token : String, secret : String) : String
-      raise Token::InvalidTokenError.new("Le token ne peut pas être vide") if token.empty?
-
-      payload_hash, _header = JWT.decode(token, secret, JWT::Algorithm::HS256)
-      hash = payload_hash.as_h
-
-      type = hash["type"]?.try(&.as_s)
-      raise Token::InvalidTokenError.new("Type de token invalide") unless type == "password_reset"
-
-      exp = hash["exp"]?.try(&.as_i64) || raise Token::InvalidTokenError.new("Champ 'exp' manquant")
-      raise Token::InvalidTokenError.new("Le token de réinitialisation a expiré") if Time.utc.to_unix >= exp
-
-      hash["sub"]?.try(&.as_s) || raise Token::InvalidTokenError.new("Adresse courriel manquante dans le token")
-    rescue ex : JWT::ExpiredSignatureError
-      raise Token::InvalidTokenError.new("Le token de réinitialisation a expiré")
-    rescue ex : JWT::DecodeError
-      raise Token::InvalidTokenError.new("Token invalide : #{ex.message}")
+      payload = Token.verify(token, secret)
+      unless payload.role == "password_reset"
+        raise Token::InvalidTokenError.new("Token invalide.")
+      end
+      payload.email
     end
 
     # Envoie un courriel de réinitialisation de mot de passe.
-    # Le lien de réinitialisation inclut le token en paramètre.
-    #
-    # ```
-    # smtp = GayaAuth::SmtpConfig.new(host: "smtp.example.com", port: 587, ...)
-    # result = GayaAuth::PasswordReset.send_reset_email(
-    #   email: "admin@gaya.fr",
-    #   reset_url: "https://app.gaya.fr/admin/reset-password",
-    #   secret: "ma_cle_secrete",
-    #   smtp: smtp,
-    #   app_name: "La Table de Gaya"
-    # )
-    # puts result.success? # => true
-    # ```
     def self.send_reset_email(
       email : String,
       reset_url : String,
       secret : String,
       smtp : SmtpConfig,
-      app_name : String = "La Table de Gaya"
+      app_name : String = "La Table de Gaya",
+      expiry : Time::Span = DEFAULT_EXPIRY
     ) : SendResult
-      raise ArgumentError.new("L'adresse courriel ne peut pas être vide") if email.empty?
-      raise ArgumentError.new("L'URL de réinitialisation ne peut pas être vide") if reset_url.empty?
+      return SendResult.new(success: false, error: "Configuration SMTP manquante.") if smtp.host.empty?
 
-      smtp_errors = smtp.validate
-      return SendResult.new(success: false, error: smtp_errors.join(", ")) unless smtp_errors.empty?
-
-      token = generate_token(email, secret)
-      full_url = "#{reset_url}?token=#{token}"
+      token = generate_token(email, secret, expiry)
+      link = "#{reset_url}?token=#{token}"
+      expiry_minutes = (expiry.total_minutes).to_i
 
       body_text = <<-TEXT
-        Bonjour,
+      Réinitialisation de votre mot de passe — #{app_name}
 
-        Vous avez demandé la réinitialisation de votre mot de passe pour #{app_name}.
+      Vous avez demandé la réinitialisation de votre mot de passe.
+      Cliquez sur le lien suivant pour définir un nouveau mot de passe :
 
-        Cliquez sur le lien ci-dessous pour définir un nouveau mot de passe :
-        #{full_url}
+      #{link}
 
-        Ce lien est valable pendant #{RESET_TOKEN_EXPIRY_HOURS} heure(s).
+      Ce lien est valide pendant #{expiry_minutes} minutes.
 
-        Si vous n'avez pas effectué cette demande, ignorez ce message.
+      Si vous n'avez pas fait cette demande, ignorez ce message.
 
-        L'équipe #{app_name}
+      — #{app_name}
       TEXT
 
       body_html = <<-HTML
-        <!DOCTYPE html>
-        <html>
-        <head><meta charset="utf-8"></head>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #2c3e50;">Réinitialisation de mot de passe</h2>
-          <p>Bonjour,</p>
-          <p>Vous avez demandé la réinitialisation de votre mot de passe pour <strong>#{app_name}</strong>.</p>
-          <p>Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe :</p>
-          <p style="text-align: center; margin: 30px 0;">
-            <a href="#{full_url}"
-               style="background-color: #27ae60; color: white; padding: 12px 24px;
-                      text-decoration: none; border-radius: 4px; font-size: 16px;">
-              Réinitialiser mon mot de passe
-            </a>
-          </p>
-          <p style="color: #7f8c8d; font-size: 14px;">
-            Ce lien est valable pendant <strong>#{RESET_TOKEN_EXPIRY_HOURS} heure(s)</strong>.
-          </p>
-          <p style="color: #7f8c8d; font-size: 14px;">
-            Si vous n'avez pas effectué cette demande, ignorez ce message.
-          </p>
-          <hr style="border: none; border-top: 1px solid #ecf0f1; margin: 20px 0;">
-          <p style="color: #bdc3c7; font-size: 12px;">L'équipe #{app_name}</p>
-        </body>
-        </html>
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head><meta charset="UTF-8"></head>
+      <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+        <h2 style="color: #363636;">#{app_name}</h2>
+        <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
+        <p style="text-align: center; margin: 30px 0;">
+          <a href="#{link}" style="background-color: #363636; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 4px; font-size: 16px;">
+            Réinitialiser mon mot de passe
+          </a>
+        </p>
+        <p style="color: #888; font-size: 13px;">Ce lien est valide pendant <strong>#{expiry_minutes} minutes</strong>.</p>
+        <p style="color: #888; font-size: 13px;">Si vous n'avez pas fait cette demande, ignorez ce message.</p>
+        <hr style="border: none; border-top: 1px solid #ecf0f1; margin: 20px 0;">
+        <p style="color: #bdc3c7; font-size: 12px;">L'équipe #{app_name}</p>
+      </body>
+      </html>
       HTML
 
-      EMail::Client.start(
-        EMail::Client::Config.new(smtp.host, smtp.port, helo_domain: smtp.from_address.split("@").last? || "localhost").tap do |c|
-          c.use_tls(EMail::Client::TLSMode::STARTTLS) if smtp.use_starttls
-          c.use_tls(EMail::Client::TLSMode::SMTPS) if smtp.use_tls
-          unless smtp.username.empty?
-            c.use_auth(smtp.username, smtp.password)
-          end
-        end
-      ) do |client|
-        message = EMail::Message.new
-        message.from("#{smtp.from_name} <#{smtp.from_address}>")
-        message.to(email)
-        message.subject("Réinitialisation de votre mot de passe - #{app_name}")
-        message.message(body_text)
-        message.html_message(body_html)
-        client.send(message)
-      end
+      begin
+        helo = smtp.from_address.split("@").last? || "localhost"
+        config = EMail::Client::Config.new(smtp.host, smtp.port, helo_domain: helo)
+        config.use_tls(EMail::Client::TLSMode::STARTTLS) if smtp.use_starttls
+        config.use_tls(EMail::Client::TLSMode::SMTPS) if smtp.use_tls
+        config.use_auth(smtp.username, smtp.password) unless smtp.username.empty?
 
-      SendResult.new(success: true, error: nil)
-    rescue ex : Exception
-      SendResult.new(success: false, error: ex.message)
+        EMail::Client.new(config).start do
+          message = EMail::Message.new
+          message.from("#{smtp.from_name} <#{smtp.from_address}>")
+          message.to(email)
+          message.subject("Réinitialisation de votre mot de passe - #{app_name}")
+          message.message(body_text)
+          message.html_message(body_html)
+          send(message)
+        end
+
+        SendResult.new(success: true, error: nil)
+      rescue ex : Exception
+        SendResult.new(success: false, error: ex.message)
+      end
     end
   end
 end
