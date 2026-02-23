@@ -150,7 +150,7 @@ module GayaAuth
       HTML
 
       EMail::Client.start(
-        EMail::Client::Config.new(smtp.host, smtp.port).tap do |c|
+        EMail::Client::Config.new(smtp.host, smtp.port, helo_domain: smtp.from_address.split("@").last? || "localhost").tap do |c|
           c.use_tls(EMail::Client::TLSMode::STARTTLS) if smtp.use_starttls
           c.use_tls(EMail::Client::TLSMode::SMTPS) if smtp.use_tls
           unless smtp.username.empty?
