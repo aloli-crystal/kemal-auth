@@ -96,7 +96,7 @@ module GayaAuth
           message.to(email)
           message.subject("Réinitialisation de votre mot de passe - #{app_name}")
           message.message(body_text)
-          message.html_message(body_html)
+          message.message_html(body_html)
           send(message)
         end
 

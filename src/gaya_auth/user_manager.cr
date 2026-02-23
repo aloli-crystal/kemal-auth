@@ -97,7 +97,7 @@ module GayaAuth
           message.to(email)
           message.subject("Invitation - #{app_name}")
           message.message(body_text)
-          message.html_message(body_html)
+          message.message_html(body_html)
           send(message)
         end
 
