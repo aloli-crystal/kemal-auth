@@ -1,0 +1,24 @@
+name: gaya_auth
+version: 0.1.0
+description: |
+  Bibliothèque d'authentification pour les applications Gaya.
+  Fournit la gestion des mots de passe (BCrypt), des tokens JWT,
+  des sessions (cookies Kemal) et la récupération de mot de passe
+  par courriel via un serveur SMTP configurable.
+
+authors:
+  - aloli
+
+crystal: ">= 1.19.1"
+
+license: MIT
+
+dependencies:
+  jwt:
+    github: crystal-community/jwt
+    version: "~> 1.6"
+  bcrypt:
+    github: jgaskins/bcrypt
+  email:
+    github: arcage/crystal-email
+    version: "~> 0.6"
