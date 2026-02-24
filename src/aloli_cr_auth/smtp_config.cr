@@ -1,10 +1,10 @@
-module GayaAuth
+module AloloCrAuth
   # Configuration du serveur SMTP pour l'envoi de courriels.
   # Toutes les valeurs sont paramétrables à l'instanciation ou
   # via les variables d'environnement correspondantes.
   #
   # ```
-  # config = GayaAuth::SmtpConfig.new(
+  # config = AloloCrAuth::SmtpConfig.new(
   #   host: "smtp.example.com",
   #   port: 587,
   #   username: "user@example.com",
@@ -39,7 +39,7 @@ module GayaAuth
     # Utile pour charger la configuration depuis une base de données.
     #
     # ```
-    # config = GayaAuth::SmtpConfig.from_hash({
+    # config = AloloCrAuth::SmtpConfig.from_hash({
     #   "smtp_host"     => "smtp.example.com",
     #   "smtp_port"     => "587",
     #   "smtp_username" => "user@example.com",

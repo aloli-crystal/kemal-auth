@@ -1,4 +1,4 @@
-# gaya-auth
+# aloli-cr-auth
 
 Bibliothèque d'authentification Crystal pour les applications Gaya.
 
@@ -6,12 +6,12 @@ Bibliothèque d'authentification Crystal pour les applications Gaya.
 
 | Module | Description |
 |--------|-------------|
-| `GayaAuth::Password` | Hachage et validation BCrypt des mots de passe |
-| `GayaAuth::Token` | Génération et vérification de tokens JWT |
-| `GayaAuth::Session` | Gestion des sessions via cookies HTTP (Kemal) |
-| `GayaAuth::SmtpConfig` | Configuration du serveur SMTP (paramétrable) |
-| `GayaAuth::PasswordReset` | Récupération de mot de passe par courriel |
-| `GayaAuth::UserManager` | Gestion des utilisateurs administrateurs |
+| `AloloCrAuth::Password` | Hachage et validation BCrypt des mots de passe |
+| `AloloCrAuth::Token` | Génération et vérification de tokens JWT |
+| `AloloCrAuth::Session` | Gestion des sessions via cookies HTTP (Kemal) |
+| `AloloCrAuth::SmtpConfig` | Configuration du serveur SMTP (paramétrable) |
+| `AloloCrAuth::PasswordReset` | Récupération de mot de passe par courriel |
+| `AloloCrAuth::UserManager` | Gestion des utilisateurs administrateurs |
 
 ## Installation
 
@@ -19,8 +19,8 @@ Ajouter dans votre `shard.yml` :
 
 ```yaml
 dependencies:
-  gaya_auth:
-    github: aloli/gaya-auth
+  aloli_cr_auth:
+    github: aloli/aloli-cr-auth
     branch: developpement
 ```
 
@@ -36,7 +36,7 @@ La configuration SMTP peut être fournie de trois manières, par ordre de priori
 
 **1. A l'instanciation (priorité maximale) :**
 ```crystal
-smtp = GayaAuth::SmtpConfig.new(
+smtp = AloloCrAuth::SmtpConfig.new(
   host: "smtp.example.com",
   port: 587,
   username: "user@example.com",
@@ -49,7 +49,7 @@ smtp = GayaAuth::SmtpConfig.new(
 
 **2. Depuis un Hash (ex. : base de données) :**
 ```crystal
-smtp = GayaAuth::SmtpConfig.from_hash({
+smtp = AloloCrAuth::SmtpConfig.from_hash({
   "smtp_host"         => "smtp.example.com",
   "smtp_port"         => "587",
   "smtp_username"     => "user@example.com",
@@ -77,30 +77,30 @@ smtp = GayaAuth::SmtpConfig.from_hash({
 ### Gestion des mots de passe
 
 ```crystal
-require "gaya_auth"
+require "aloli_cr_auth"
 
-hash = GayaAuth::Password.hash("MonMotDePasse1")
-GayaAuth::Password.verify("MonMotDePasse1", hash) # => true
-errors = GayaAuth::Password.validate("faible")
+hash = AloloCrAuth::Password.hash("MonMotDePasse1")
+AloloCrAuth::Password.verify("MonMotDePasse1", hash) # => true
+errors = AloloCrAuth::Password.validate("faible")
 ```
 
 ### Tokens JWT
 
 ```crystal
-token = GayaAuth::Token.generate(
+token = AloloCrAuth::Token.generate(
   secret: ENV["SESSION_SECRET"],
   sub: "1",
   email: "admin@gaya.fr",
   role: "admin"
 )
-payload = GayaAuth::Token.decode(token, ENV["SESSION_SECRET"])
+payload = AloloCrAuth::Token.decode(token, ENV["SESSION_SECRET"])
 ```
 
 ### Recuperation de mot de passe
 
 ```crystal
-smtp = GayaAuth::SmtpConfig.new(host: "smtp.example.com", ...)
-result = GayaAuth::PasswordReset.send_reset_email(
+smtp = AloloCrAuth::SmtpConfig.new(host: "smtp.example.com", ...)
+result = AloloCrAuth::PasswordReset.send_reset_email(
   email: "admin@gaya.fr",
   reset_url: "https://app.gaya.fr/admin/reset-password",
   secret: ENV["SESSION_SECRET"],
@@ -111,15 +111,15 @@ result = GayaAuth::PasswordReset.send_reset_email(
 ### Gestion des utilisateurs
 
 ```crystal
-errors = GayaAuth::UserManager.validate_user(
+errors = AloloCrAuth::UserManager.validate_user(
   email: "nouveau@gaya.fr", nom: "Martin", prenom: "Sophie", role: "gestionnaire"
 )
-GayaAuth::UserManager.send_invitation_email(
+AloloCrAuth::UserManager.send_invitation_email(
   email: "nouveau@gaya.fr", prenom: "Sophie",
   invitation_url: "https://app.gaya.fr/admin/set-password",
   secret: ENV["SESSION_SECRET"], smtp: smtp
 )
-temp_pwd = GayaAuth::UserManager.generate_temp_password
+temp_pwd = AloloCrAuth::UserManager.generate_temp_password
 ```
 
 ## Tests

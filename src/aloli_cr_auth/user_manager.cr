@@ -3,14 +3,14 @@ require "./password"
 require "./smtp_config"
 require "./password_reset"
 
-module GayaAuth
+module AloloCrAuth
   # Module de gestion des utilisateurs administrateurs.
   # Fournit des utilitaires pour la création, la validation et l'invitation
   # des utilisateurs via courriel.
   module UserManager
     VALID_ROLES = %w[admin gestionnaire]
 
-    # Hache un mot de passe via GayaAuth::Password.
+    # Hache un mot de passe via AloloCrAuth::Password.
     def self.hash_password(password : String) : String
       Password.hash(password)
     end
@@ -21,18 +21,21 @@ module GayaAuth
     end
 
     # Génère un mot de passe temporaire sécurisé.
-    def self.generate_temp_password : String
-      Random::Secure.hex(16)
+    def self.generate_temp_password(length : Int32 = 16) : String
+      Random::Secure.hex(length // 2)
     end
 
     # Valide les champs d'un utilisateur. Retourne une liste d'erreurs.
-    def self.validate_user(email : String, nom : String, prenom : String, role : String) : Array(String)
+    def self.validate_user(email : String, nom : String, prenom : String, role : String, password : String? = nil) : Array(String)
       errors = [] of String
       errors << "L'adresse courriel est requise." if email.empty?
       errors << "L'adresse courriel est invalide." unless email.includes?("@") || email.empty?
       errors << "Le nom est requis." if nom.empty?
       errors << "Le prénom est requis." if prenom.empty?
       errors << "Le rôle est invalide." unless VALID_ROLES.includes?(role)
+      if pwd = password
+        errors.concat(Password.validate(pwd))
+      end
       errors
     end
 

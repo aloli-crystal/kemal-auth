@@ -2,7 +2,7 @@ require "email"
 require "./token"
 require "./smtp_config"
 
-module GayaAuth
+module AloloCrAuth
   # Module de réinitialisation de mot de passe par courriel.
   # Génère un token JWT signé à durée limitée et envoie un courriel
   # avec un lien de réinitialisation.
@@ -13,6 +13,8 @@ module GayaAuth
 
     # Génère un token de réinitialisation JWT.
     def self.generate_token(email : String, secret : String, expiry : Time::Span = DEFAULT_EXPIRY) : String
+      raise ArgumentError.new("L'adresse courriel est requise.") if email.empty?
+      raise ArgumentError.new("La clé secrète est requise.") if secret.empty?
       expiry_hours = [1, (expiry.total_hours).ceil.to_i].max
       Token.generate(
         secret: secret,
@@ -28,7 +30,7 @@ module GayaAuth
     def self.verify_token(token : String, secret : String) : String
       payload = Token.decode(token, secret)
       unless payload.role == "password_reset"
-        raise Token::InvalidTokenError.new("Token invalide.")
+        raise Token::InvalidTokenError.new("Type de token invalide.")
       end
       payload.email
     end

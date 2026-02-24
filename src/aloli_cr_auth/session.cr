@@ -1,6 +1,6 @@
 require "./token"
 
-module GayaAuth
+module AloloCrAuth
   # Gestion des sessions d'authentification via cookies HTTP.
   # Conçu pour fonctionner avec le framework Kemal.
   module Session
@@ -23,7 +23,7 @@ module GayaAuth
     # Retourne un objet HTTP::Cookie prêt à être ajouté à la réponse.
     #
     # ```
-    # cookie = GayaAuth::Session.create_cookie(token, expiry_hours: 8)
+    # cookie = AloloCrAuth::Session.create_cookie(token, expiry_hours: 8)
     # env.response.cookies << cookie
     # ```
     def self.create_cookie(
@@ -45,7 +45,7 @@ module GayaAuth
     # Crée un cookie de déconnexion (valeur vide, expiration passée).
     #
     # ```
-    # env.response.cookies << GayaAuth::Session.logout_cookie
+    # env.response.cookies << AloloCrAuth::Session.logout_cookie
     # ```
     def self.logout_cookie : HTTP::Cookie
       HTTP::Cookie.new(
@@ -62,7 +62,7 @@ module GayaAuth
     # Retourne un `SessionInfo` avec le résultat de la vérification.
     #
     # ```
-    # info = GayaAuth::Session.verify(cookies, secret: "ma_cle_secrete")
+    # info = AloloCrAuth::Session.verify(cookies, secret: "ma_cle_secrete")
     # if info.authenticated?
     #   puts info.payload.not_nil!.email
     # end
@@ -88,7 +88,7 @@ module GayaAuth
     # Vérifie si la session est authentifiée (version simplifiée).
     #
     # ```
-    # GayaAuth::Session.authenticated?(cookies, secret: "ma_cle_secrete")
+    # AloloCrAuth::Session.authenticated?(cookies, secret: "ma_cle_secrete")
     # ```
     def self.authenticated?(cookies : HTTP::Cookies, secret : String) : Bool
       verify(cookies, secret).authenticated?

@@ -1,0 +1,56 @@
+require "./aloli_cr_auth/password"
+require "./aloli_cr_auth/token"
+require "./aloli_cr_auth/session"
+require "./aloli_cr_auth/smtp_config"
+require "./aloli_cr_auth/password_reset"
+require "./aloli_cr_auth/user_manager"
+
+# AloloCrAuth — Bibliothèque d'authentification pour les applications Gaya
+#
+# Modules disponibles :
+# - `AloloCrAuth::Password`      — Hachage et validation BCrypt des mots de passe
+# - `AloloCrAuth::Token`         — Génération et vérification de tokens JWT
+# - `AloloCrAuth::Session`       — Gestion des sessions via cookies HTTP (Kemal)
+# - `AloloCrAuth::SmtpConfig`    — Configuration du serveur SMTP
+# - `AloloCrAuth::PasswordReset` — Récupération de mot de passe par courriel
+# - `AloloCrAuth::UserManager`   — Gestion des utilisateurs administrateurs
+#
+# ## Utilisation rapide
+#
+# ```crystal
+# require "aloli_cr_auth"
+#
+# # Configuration SMTP
+# smtp = AloloCrAuth::SmtpConfig.new(
+#   host: "smtp.example.com",
+#   port: 587,
+#   username: "user@example.com",
+#   password: "secret",
+#   from_address: "noreply@gaya.fr",
+#   from_name: "La Table de Gaya"
+# )
+#
+# # Hachage d'un mot de passe
+# hash = AloloCrAuth::Password.hash("MonMotDePasse1")
+#
+# # Vérification
+# AloloCrAuth::Password.verify("MonMotDePasse1", hash) # => true
+#
+# # Génération d'un token JWT
+# token = AloloCrAuth::Token.generate(
+#   secret: ENV["SESSION_SECRET"],
+#   sub: "1",
+#   email: "admin@gaya.fr"
+# )
+#
+# # Envoi d'un courriel de réinitialisation
+# AloloCrAuth::PasswordReset.send_reset_email(
+#   email: "admin@gaya.fr",
+#   reset_url: "https://app.gaya.fr/admin/reset-password",
+#   secret: ENV["SESSION_SECRET"],
+#   smtp: smtp
+# )
+# ```
+module AloloCrAuth
+  VERSION = "0.1.0"
+end

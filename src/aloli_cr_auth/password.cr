@@ -1,6 +1,6 @@
 require "bcrypt"
 
-module GayaAuth
+module AloloCrAuth
   # Gestion sécurisée des mots de passe via BCrypt.
   # Encapsule le hachage et la vérification des mots de passe
   # avec un coût configurable.
@@ -11,7 +11,7 @@ module GayaAuth
     # Hache un mot de passe en clair et retourne le hash BCrypt.
     #
     # ```
-    # hash = GayaAuth::Password.hash("mon_mot_de_passe")
+    # hash = AloloCrAuth::Password.hash("mon_mot_de_passe")
     # ```
     def self.hash(plain_password : String, cost : Int32 = DEFAULT_COST) : String
       raise ArgumentError.new("Le mot de passe ne peut pas être vide") if plain_password.empty?
@@ -22,7 +22,7 @@ module GayaAuth
     # Vérifie qu'un mot de passe en clair correspond au hash BCrypt stocké.
     #
     # ```
-    # GayaAuth::Password.verify("mon_mot_de_passe", stored_hash) # => true ou false
+    # AloloCrAuth::Password.verify("mon_mot_de_passe", stored_hash) # => true ou false
     # ```
     def self.verify(plain_password : String, hashed_password : String) : Bool
       return false if plain_password.empty? || hashed_password.empty?
@@ -35,7 +35,7 @@ module GayaAuth
     # Retourne un tableau de messages d'erreur (vide si valide).
     #
     # ```
-    # errors = GayaAuth::Password.validate("abc")
+    # errors = AloloCrAuth::Password.validate("abc")
     # # => ["Le mot de passe doit contenir au moins 8 caractères"]
     # ```
     def self.validate(plain_password : String) : Array(String)
