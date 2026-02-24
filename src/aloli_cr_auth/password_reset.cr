@@ -1,6 +1,6 @@
 require "email"
-require "./token"
 require "./smtp_config"
+require "./token"
 
 module AloliCrAuth
   # Module de réinitialisation de mot de passe par courriel.
@@ -13,8 +13,8 @@ module AloliCrAuth
 
     # Génère un token de réinitialisation JWT.
     def self.generate_token(email : String, secret : String, expiry : Time::Span = DEFAULT_EXPIRY) : String
-      raise ArgumentError.new("L'adresse courriel est requise.") if email.empty?
-      raise ArgumentError.new("La clé secrète est requise.") if secret.empty?
+      raise ArgumentError.new("L'email ne peut pas être vide") if email.empty?
+      raise ArgumentError.new("Le secret ne peut pas être vide") if secret.empty?
       expiry_hours = [1, (expiry.total_hours).ceil.to_i].max
       Token.generate(
         secret: secret,
@@ -23,16 +23,6 @@ module AloliCrAuth
         role: "password_reset",
         expiry_hours: expiry_hours
       )
-    end
-
-    # Vérifie un token de réinitialisation et retourne l'email associé.
-    # Lève Token::InvalidTokenError si le token est invalide ou expiré.
-    def self.verify_token(token : String, secret : String) : String
-      payload = Token.decode(token, secret)
-      unless payload.role == "password_reset"
-        raise Token::InvalidTokenError.new("Type de token invalide.")
-      end
-      payload.email
     end
 
     # Envoie un courriel de réinitialisation de mot de passe.
@@ -95,10 +85,10 @@ module AloliCrAuth
         EMail::Client.new(config).start do
           message = EMail::Message.new
           message.from("#{smtp.from_name} <#{smtp.from_address}>")
-          message.to(email)
-          message.subject("Réinitialisation de votre mot de passe - #{app_name}")
           message.message(body_text)
           message.message_html(body_html)
+          message.subject("Réinitialisation de votre mot de passe - #{app_name}")
+          message.to(email)
           send(message)
         end
 
@@ -106,6 +96,16 @@ module AloliCrAuth
       rescue ex : Exception
         SendResult.new(success: false, error: ex.message)
       end
+    end
+
+    # Vérifie un token de réinitialisation et retourne l'email associé.
+    # Lève Token::InvalidTokenError si le token est invalide ou expiré.
+    def self.verify_token(token : String, secret : String) : String
+      payload = Token.decode(token, secret)
+      unless payload.role == "password_reset"
+        raise Token::InvalidTokenError.new("Type de token invalide.")
+      end
+      payload.email
     end
   end
 end

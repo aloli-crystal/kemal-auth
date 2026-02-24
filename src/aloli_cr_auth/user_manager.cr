@@ -1,7 +1,7 @@
 require "email"
 require "./password"
-require "./smtp_config"
 require "./password_reset"
+require "./smtp_config"
 
 module AloliCrAuth
   # Module de gestion des utilisateurs administrateurs.
@@ -10,33 +10,14 @@ module AloliCrAuth
   module UserManager
     VALID_ROLES = %w[admin gestionnaire]
 
+    # Génère un mot de passe temporaire sécurisé.
+    def self.generate_temp_password(length : Int32 = 16) : String
+      Random::Secure.hex(length)
+    end
+
     # Hache un mot de passe via AloliCrAuth::Password.
     def self.hash_password(password : String) : String
       Password.hash(password)
-    end
-
-    # Vérifie un mot de passe contre son hash.
-    def self.verify_password(password : String, hash : String) : Bool
-      Password.verify(password, hash)
-    end
-
-    # Génère un mot de passe temporaire sécurisé.
-    def self.generate_temp_password(length : Int32 = 16) : String
-      Random::Secure.hex(length // 2)
-    end
-
-    # Valide les champs d'un utilisateur. Retourne une liste d'erreurs.
-    def self.validate_user(email : String, nom : String, prenom : String, role : String, password : String? = nil) : Array(String)
-      errors = [] of String
-      errors << "L'adresse courriel est requise." if email.empty?
-      errors << "L'adresse courriel est invalide." unless email.includes?("@") || email.empty?
-      errors << "Le nom est requis." if nom.empty?
-      errors << "Le prénom est requis." if prenom.empty?
-      errors << "Le rôle est invalide." unless VALID_ROLES.includes?(role)
-      if pwd = password
-        errors.concat(Password.validate(pwd))
-      end
-      errors
     end
 
     # Envoie un courriel d'invitation à un nouvel utilisateur.
@@ -97,10 +78,10 @@ module AloliCrAuth
         EMail::Client.new(config).start do
           message = EMail::Message.new
           message.from("#{smtp.from_name} <#{smtp.from_address}>")
-          message.to(email)
-          message.subject("Invitation - #{app_name}")
           message.message(body_text)
           message.message_html(body_html)
+          message.subject("Invitation - #{app_name}")
+          message.to(email)
           send(message)
         end
 
@@ -108,6 +89,23 @@ module AloliCrAuth
       rescue ex : Exception
         PasswordReset::SendResult.new(success: false, error: ex.message)
       end
+    end
+
+    # Valide les champs d'un utilisateur. Retourne une liste d'erreurs.
+    def self.validate_user(email : String, nom : String, prenom : String, role : String, password : String = "") : Array(String)
+      errors = [] of String
+      errors << "L'adresse courriel est invalide." unless email.includes?("@") || email.empty?
+      errors << "L'adresse courriel est requise." if email.empty?
+      errors << "Le nom est requis." if nom.empty?
+      errors << "Le prénom est requis." if prenom.empty?
+      errors << "Le rôle est invalide." unless VALID_ROLES.includes?(role)
+      errors.concat(Password.validate(password)) unless password.empty?
+      errors
+    end
+
+    # Vérifie un mot de passe contre son hash.
+    def self.verify_password(password : String, hash : String) : Bool
+      Password.verify(password, hash)
     end
   end
 end

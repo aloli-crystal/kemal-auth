@@ -19,18 +19,6 @@ module AloliCrAuth
       BCrypt::Password.create(plain_password, cost: cost).to_s
     end
 
-    # Vérifie qu'un mot de passe en clair correspond au hash BCrypt stocké.
-    #
-    # ```
-    # AloliCrAuth::Password.verify("mon_mot_de_passe", stored_hash) # => true ou false
-    # ```
-    def self.verify(plain_password : String, hashed_password : String) : Bool
-      return false if plain_password.empty? || hashed_password.empty?
-      BCrypt::Password.new(hashed_password).verify(plain_password)
-    rescue
-      false
-    end
-
     # Vérifie la robustesse d'un mot de passe.
     # Retourne un tableau de messages d'erreur (vide si valide).
     #
@@ -50,6 +38,18 @@ module AloliCrAuth
     # Retourne true si le mot de passe respecte toutes les règles de robustesse.
     def self.valid?(plain_password : String) : Bool
       validate(plain_password).empty?
+    end
+
+    # Vérifie qu'un mot de passe en clair correspond au hash BCrypt stocké.
+    #
+    # ```
+    # AloliCrAuth::Password.verify("mon_mot_de_passe", stored_hash) # => true ou false
+    # ```
+    def self.verify(plain_password : String, hashed_password : String) : Bool
+      return false if plain_password.empty? || hashed_password.empty?
+      BCrypt::Password.new(hashed_password).verify(plain_password)
+    rescue
+      false
     end
   end
 end

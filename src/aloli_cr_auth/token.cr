@@ -27,6 +27,35 @@ module AloliCrAuth
       end
     end
 
+    # Décode et vérifie un token JWT.
+    # Lève `InvalidTokenError` si le token est invalide, expiré ou mal formé.
+    #
+    # ```
+    # payload = AloliCrAuth::Token.decode(token, secret: "ma_cle_secrete")
+    # puts payload.email
+    # ```
+    def self.decode(token : String, secret : String) : Payload
+      raise InvalidTokenError.new("Le token ne peut pas être vide") if token.empty?
+      raise InvalidTokenError.new("La clé secrète ne peut pas être vide") if secret.empty?
+
+      payload_hash, _header = JWT.decode(token, secret, JWT::Algorithm::HS256)
+      hash = payload_hash.as_h
+
+      sub   = hash["sub"]?.try(&.as_s) || raise InvalidTokenError.new("Champ 'sub' manquant")
+      email = hash["email"]?.try(&.as_s) || ""
+      role  = hash["role"]?.try(&.as_s) || "admin"
+      exp   = hash["exp"]?.try(&.as_i64) || raise InvalidTokenError.new("Champ 'exp' manquant")
+      iat   = hash["iat"]?.try(&.as_i64) || 0_i64
+
+      p = Payload.new(sub: sub, email: email, role: role, exp: exp, iat: iat)
+      raise InvalidTokenError.new("Le token a expiré") if p.expired?
+      p
+    rescue ex : JWT::ExpiredSignatureError
+      raise InvalidTokenError.new("Le token a expiré")
+    rescue ex : JWT::DecodeError
+      raise InvalidTokenError.new("Token invalide : #{ex.message}")
+    end
+
     # Génère un token JWT signé pour un utilisateur authentifié.
     #
     # ```
@@ -82,35 +111,6 @@ module AloliCrAuth
         "iat"               => Time.utc.to_unix
       }
       JWT.encode(payload, secret, JWT::Algorithm::HS256)
-    end
-
-    # Décode et vérifie un token JWT.
-    # Lève `InvalidTokenError` si le token est invalide, expiré ou mal formé.
-    #
-    # ```
-    # payload = AloliCrAuth::Token.decode(token, secret: "ma_cle_secrete")
-    # puts payload.email
-    # ```
-    def self.decode(token : String, secret : String) : Payload
-      raise InvalidTokenError.new("Le token ne peut pas être vide") if token.empty?
-      raise InvalidTokenError.new("La clé secrète ne peut pas être vide") if secret.empty?
-
-      payload_hash, _header = JWT.decode(token, secret, JWT::Algorithm::HS256)
-      hash = payload_hash.as_h
-
-      sub   = hash["sub"]?.try(&.as_s) || raise InvalidTokenError.new("Champ 'sub' manquant")
-      email = hash["email"]?.try(&.as_s) || ""
-      role  = hash["role"]?.try(&.as_s) || "admin"
-      exp   = hash["exp"]?.try(&.as_i64) || raise InvalidTokenError.new("Champ 'exp' manquant")
-      iat   = hash["iat"]?.try(&.as_i64) || 0_i64
-
-      p = Payload.new(sub: sub, email: email, role: role, exp: exp, iat: iat)
-      raise InvalidTokenError.new("Le token a expiré") if p.expired?
-      p
-    rescue ex : JWT::ExpiredSignatureError
-      raise InvalidTokenError.new("Le token a expiré")
-    rescue ex : JWT::DecodeError
-      raise InvalidTokenError.new("Token invalide : #{ex.message}")
     end
 
     # Vérifie si un token est valide sans lever d'exception.

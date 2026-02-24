@@ -4,10 +4,10 @@ module AloliCrAuth
   # Gestion des sessions d'authentification via cookies HTTP.
   # Conçu pour fonctionner avec le framework Kemal.
   module Session
-    COOKIE_NAME    = "gaya_auth_token"
-    COOKIE_PATH    = "/"
-    COOKIE_SECURE  = true
     COOKIE_HTTPONLY = true
+    COOKIE_NAME     = "aloli_auth_token"
+    COOKIE_PATH     = "/"
+    COOKIE_SECURE   = true
 
     # Résultat d'une vérification de session
     record SessionInfo,
@@ -17,6 +17,15 @@ module AloliCrAuth
       def authenticated? : Bool
         authenticated
       end
+    end
+
+    # Vérifie si la session est authentifiée (version simplifiée).
+    #
+    # ```
+    # AloliCrAuth::Session.authenticated?(cookies, secret: "ma_cle_secrete")
+    # ```
+    def self.authenticated?(cookies : HTTP::Cookies, secret : String) : Bool
+      verify(cookies, secret).authenticated?
     end
 
     # Crée un cookie de session sécurisé à partir d'un token JWT.
@@ -83,15 +92,6 @@ module AloliCrAuth
       SessionInfo.new(authenticated: true, payload: payload, error: nil)
     rescue ex : Token::InvalidTokenError
       SessionInfo.new(authenticated: false, payload: nil, error: ex.message)
-    end
-
-    # Vérifie si la session est authentifiée (version simplifiée).
-    #
-    # ```
-    # AloliCrAuth::Session.authenticated?(cookies, secret: "ma_cle_secrete")
-    # ```
-    def self.authenticated?(cookies : HTTP::Cookies, secret : String) : Bool
-      verify(cookies, secret).authenticated?
     end
   end
 end
