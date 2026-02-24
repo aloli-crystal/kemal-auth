@@ -1,125 +1,125 @@
 require "./spec_helper"
 
 # =============================================================================
-# Tests AloloCrAuth::Password
+# Tests AloliCrAuth::Password
 # =============================================================================
-describe AloloCrAuth::Password do
+describe AloliCrAuth::Password do
   describe ".hash" do
     it "hache un mot de passe valide" do
-      hash = AloloCrAuth::Password.hash(TEST_PASSWORD)
+      hash = AloliCrAuth::Password.hash(TEST_PASSWORD)
       hash.should_not be_empty
       hash.should start_with("$2")
     end
 
     it "produit des hashes différents pour le même mot de passe" do
-      hash1 = AloloCrAuth::Password.hash(TEST_PASSWORD)
-      hash2 = AloloCrAuth::Password.hash(TEST_PASSWORD)
+      hash1 = AloliCrAuth::Password.hash(TEST_PASSWORD)
+      hash2 = AloliCrAuth::Password.hash(TEST_PASSWORD)
       hash1.should_not eq(hash2)
     end
 
     it "lève une erreur si le mot de passe est vide" do
       expect_raises(ArgumentError, "vide") do
-        AloloCrAuth::Password.hash("")
+        AloliCrAuth::Password.hash("")
       end
     end
 
     it "lève une erreur si le mot de passe est trop court" do
       expect_raises(ArgumentError, "8 caractères") do
-        AloloCrAuth::Password.hash("abc")
+        AloliCrAuth::Password.hash("abc")
       end
     end
   end
 
   describe ".verify" do
     it "retourne true pour un mot de passe correct" do
-      hash = AloloCrAuth::Password.hash(TEST_PASSWORD)
-      AloloCrAuth::Password.verify(TEST_PASSWORD, hash).should be_true
+      hash = AloliCrAuth::Password.hash(TEST_PASSWORD)
+      AloliCrAuth::Password.verify(TEST_PASSWORD, hash).should be_true
     end
 
     it "retourne false pour un mot de passe incorrect" do
-      hash = AloloCrAuth::Password.hash(TEST_PASSWORD)
-      AloloCrAuth::Password.verify("MauvaisMotDePasse1", hash).should be_false
+      hash = AloliCrAuth::Password.hash(TEST_PASSWORD)
+      AloliCrAuth::Password.verify("MauvaisMotDePasse1", hash).should be_false
     end
 
     it "retourne false si le mot de passe est vide" do
-      hash = AloloCrAuth::Password.hash(TEST_PASSWORD)
-      AloloCrAuth::Password.verify("", hash).should be_false
+      hash = AloliCrAuth::Password.hash(TEST_PASSWORD)
+      AloliCrAuth::Password.verify("", hash).should be_false
     end
 
     it "retourne false si le hash est vide" do
-      AloloCrAuth::Password.verify(TEST_PASSWORD, "").should be_false
+      AloliCrAuth::Password.verify(TEST_PASSWORD, "").should be_false
     end
 
     it "retourne false pour un hash malformé" do
-      AloloCrAuth::Password.verify(TEST_PASSWORD, "hash_invalide").should be_false
+      AloliCrAuth::Password.verify(TEST_PASSWORD, "hash_invalide").should be_false
     end
   end
 
   describe ".validate" do
     it "retourne un tableau vide pour un mot de passe valide" do
-      AloloCrAuth::Password.validate(TEST_PASSWORD).should be_empty
+      AloliCrAuth::Password.validate(TEST_PASSWORD).should be_empty
     end
 
     it "signale un mot de passe vide" do
-      errors = AloloCrAuth::Password.validate("")
+      errors = AloliCrAuth::Password.validate("")
       errors.should_not be_empty
     end
 
     it "signale un mot de passe trop court" do
-      errors = AloloCrAuth::Password.validate("Ab1")
+      errors = AloliCrAuth::Password.validate("Ab1")
       errors.any? { |e| e.includes?("8 caractères") }.should be_true
     end
 
     it "signale l'absence de majuscule" do
-      errors = AloloCrAuth::Password.validate("motdepasse1")
+      errors = AloliCrAuth::Password.validate("motdepasse1")
       errors.any? { |e| e.includes?("majuscule") }.should be_true
     end
 
     it "signale l'absence de chiffre" do
-      errors = AloloCrAuth::Password.validate("MotDePasseSansChiffre")
+      errors = AloliCrAuth::Password.validate("MotDePasseSansChiffre")
       errors.any? { |e| e.includes?("chiffre") }.should be_true
     end
   end
 
   describe ".valid?" do
     it "retourne true pour un mot de passe valide" do
-      AloloCrAuth::Password.valid?(TEST_PASSWORD).should be_true
+      AloliCrAuth::Password.valid?(TEST_PASSWORD).should be_true
     end
 
     it "retourne false pour un mot de passe invalide" do
-      AloloCrAuth::Password.valid?("court").should be_false
+      AloliCrAuth::Password.valid?("court").should be_false
     end
   end
 end
 
 # =============================================================================
-# Tests AloloCrAuth::Token
+# Tests AloliCrAuth::Token
 # =============================================================================
-describe AloloCrAuth::Token do
+describe AloliCrAuth::Token do
   describe ".generate" do
     it "génère un token JWT non vide" do
-      token = AloloCrAuth::Token.generate(secret: SECRET_KEY, sub: "1", email: TEST_EMAIL)
+      token = AloliCrAuth::Token.generate(secret: SECRET_KEY, sub: "1", email: TEST_EMAIL)
       token.should_not be_empty
       token.split(".").size.should eq(3)
     end
 
     it "lève une erreur si la clé secrète est vide" do
       expect_raises(ArgumentError, "secrète") do
-        AloloCrAuth::Token.generate(secret: "", sub: "1", email: TEST_EMAIL)
+        AloliCrAuth::Token.generate(secret: "", sub: "1", email: TEST_EMAIL)
       end
     end
 
     it "lève une erreur si le sujet est vide" do
       expect_raises(ArgumentError, "sub") do
-        AloloCrAuth::Token.generate(secret: SECRET_KEY, sub: "", email: TEST_EMAIL)
+        AloliCrAuth::Token.generate(secret: SECRET_KEY, sub: "", email: TEST_EMAIL)
       end
     end
   end
 
   describe ".decode" do
     it "décode un token valide" do
-      token = AloloCrAuth::Token.generate(secret: SECRET_KEY, sub: "42", email: TEST_EMAIL, role: "admin")
-      payload = AloloCrAuth::Token.decode(token, SECRET_KEY)
+      token = AloliCrAuth::Token.generate(secret: SECRET_KEY, sub: "42", email: TEST_EMAIL, role: "admin")
+      payload = AloliCrAuth::Token.decode(token, SECRET_KEY)
       payload.sub.should eq("42")
       payload.email.should eq(TEST_EMAIL)
       payload.role.should eq("admin")
@@ -127,43 +127,43 @@ describe AloloCrAuth::Token do
     end
 
     it "lève InvalidTokenError pour un token vide" do
-      expect_raises(AloloCrAuth::Token::InvalidTokenError, "vide") do
-        AloloCrAuth::Token.decode("", SECRET_KEY)
+      expect_raises(AloliCrAuth::Token::InvalidTokenError, "vide") do
+        AloliCrAuth::Token.decode("", SECRET_KEY)
       end
     end
 
     it "lève InvalidTokenError pour une mauvaise clé secrète" do
-      token = AloloCrAuth::Token.generate(secret: SECRET_KEY, sub: "1", email: TEST_EMAIL)
-      expect_raises(AloloCrAuth::Token::InvalidTokenError) do
-        AloloCrAuth::Token.decode(token, "mauvaise_cle_secrete_suffisamment_longue")
+      token = AloliCrAuth::Token.generate(secret: SECRET_KEY, sub: "1", email: TEST_EMAIL)
+      expect_raises(AloliCrAuth::Token::InvalidTokenError) do
+        AloliCrAuth::Token.decode(token, "mauvaise_cle_secrete_suffisamment_longue")
       end
     end
 
     it "lève InvalidTokenError pour un token malformé" do
-      expect_raises(AloloCrAuth::Token::InvalidTokenError) do
-        AloloCrAuth::Token.decode("token.invalide.ici", SECRET_KEY)
+      expect_raises(AloliCrAuth::Token::InvalidTokenError) do
+        AloliCrAuth::Token.decode("token.invalide.ici", SECRET_KEY)
       end
     end
   end
 
   describe ".valid?" do
     it "retourne true pour un token valide" do
-      token = AloloCrAuth::Token.generate(secret: SECRET_KEY, sub: "1", email: TEST_EMAIL)
-      AloloCrAuth::Token.valid?(token, SECRET_KEY).should be_true
+      token = AloliCrAuth::Token.generate(secret: SECRET_KEY, sub: "1", email: TEST_EMAIL)
+      AloliCrAuth::Token.valid?(token, SECRET_KEY).should be_true
     end
 
     it "retourne false pour un token invalide" do
-      AloloCrAuth::Token.valid?("token_invalide", SECRET_KEY).should be_false
+      AloliCrAuth::Token.valid?("token_invalide", SECRET_KEY).should be_false
     end
 
     it "retourne false pour un token vide" do
-      AloloCrAuth::Token.valid?("", SECRET_KEY).should be_false
+      AloliCrAuth::Token.valid?("", SECRET_KEY).should be_false
     end
   end
 
   describe ".generate_reservation_token" do
     it "génère un token de réservation valide" do
-      token = AloloCrAuth::Token.generate_reservation_token(
+      token = AloliCrAuth::Token.generate_reservation_token(
         secret: SECRET_KEY,
         reservation_token: "abc123def456"
       )
@@ -173,19 +173,19 @@ describe AloloCrAuth::Token do
 
     it "lève une erreur si la clé secrète est vide" do
       expect_raises(ArgumentError) do
-        AloloCrAuth::Token.generate_reservation_token(secret: "", reservation_token: "abc123")
+        AloliCrAuth::Token.generate_reservation_token(secret: "", reservation_token: "abc123")
       end
     end
   end
 end
 
 # =============================================================================
-# Tests AloloCrAuth::SmtpConfig
+# Tests AloliCrAuth::SmtpConfig
 # =============================================================================
-describe AloloCrAuth::SmtpConfig do
+describe AloliCrAuth::SmtpConfig do
   describe ".new" do
     it "crée une configuration avec les valeurs fournies" do
-      config = AloloCrAuth::SmtpConfig.new(
+      config = AloliCrAuth::SmtpConfig.new(
         host: "smtp.example.com",
         port: 587,
         username: "user@example.com",
@@ -201,7 +201,7 @@ describe AloloCrAuth::SmtpConfig do
 
   describe ".from_hash" do
     it "crée une configuration depuis un Hash" do
-      config = AloloCrAuth::SmtpConfig.from_hash({
+      config = AloliCrAuth::SmtpConfig.from_hash({
         "smtp_host"         => "smtp.test.com",
         "smtp_port"         => "465",
         "smtp_from_address" => "test@test.com",
@@ -214,7 +214,7 @@ describe AloloCrAuth::SmtpConfig do
 
   describe ".validate" do
     it "retourne un tableau vide pour une configuration valide" do
-      config = AloloCrAuth::SmtpConfig.new(
+      config = AloliCrAuth::SmtpConfig.new(
         host: "smtp.example.com",
         port: 587,
         from_address: "noreply@example.com"
@@ -223,82 +223,82 @@ describe AloloCrAuth::SmtpConfig do
     end
 
     it "signale un hôte vide" do
-      config = AloloCrAuth::SmtpConfig.new(host: "", port: 587, from_address: "test@test.com")
+      config = AloliCrAuth::SmtpConfig.new(host: "", port: 587, from_address: "test@test.com")
       config.validate.any? { |e| e.includes?("hôte") }.should be_true
     end
 
     it "signale un port invalide" do
-      config = AloloCrAuth::SmtpConfig.new(host: "smtp.test.com", port: 0, from_address: "test@test.com")
+      config = AloliCrAuth::SmtpConfig.new(host: "smtp.test.com", port: 0, from_address: "test@test.com")
       config.validate.any? { |e| e.includes?("port") }.should be_true
     end
 
     it "signale une adresse d'expédition invalide" do
-      config = AloloCrAuth::SmtpConfig.new(host: "smtp.test.com", port: 587, from_address: "invalide")
+      config = AloliCrAuth::SmtpConfig.new(host: "smtp.test.com", port: 587, from_address: "invalide")
       config.validate.any? { |e| e.includes?("invalide") }.should be_true
     end
   end
 end
 
 # =============================================================================
-# Tests AloloCrAuth::PasswordReset
+# Tests AloliCrAuth::PasswordReset
 # =============================================================================
-describe AloloCrAuth::PasswordReset do
+describe AloliCrAuth::PasswordReset do
   describe ".generate_token" do
     it "génère un token de réinitialisation valide" do
-      token = AloloCrAuth::PasswordReset.generate_token(TEST_EMAIL, SECRET_KEY)
+      token = AloliCrAuth::PasswordReset.generate_token(TEST_EMAIL, SECRET_KEY)
       token.should_not be_empty
       token.split(".").size.should eq(3)
     end
 
     it "lève une erreur si l'email est vide" do
       expect_raises(ArgumentError, "courriel") do
-        AloloCrAuth::PasswordReset.generate_token("", SECRET_KEY)
+        AloliCrAuth::PasswordReset.generate_token("", SECRET_KEY)
       end
     end
 
     it "lève une erreur si la clé secrète est vide" do
       expect_raises(ArgumentError, "secrète") do
-        AloloCrAuth::PasswordReset.generate_token(TEST_EMAIL, "")
+        AloliCrAuth::PasswordReset.generate_token(TEST_EMAIL, "")
       end
     end
   end
 
   describe ".verify_token" do
     it "retourne l'email pour un token valide" do
-      token = AloloCrAuth::PasswordReset.generate_token(TEST_EMAIL, SECRET_KEY)
-      email = AloloCrAuth::PasswordReset.verify_token(token, SECRET_KEY)
+      token = AloliCrAuth::PasswordReset.generate_token(TEST_EMAIL, SECRET_KEY)
+      email = AloliCrAuth::PasswordReset.verify_token(token, SECRET_KEY)
       email.should eq(TEST_EMAIL)
     end
 
     it "lève InvalidTokenError pour un token vide" do
-      expect_raises(AloloCrAuth::Token::InvalidTokenError, "vide") do
-        AloloCrAuth::PasswordReset.verify_token("", SECRET_KEY)
+      expect_raises(AloliCrAuth::Token::InvalidTokenError, "vide") do
+        AloliCrAuth::PasswordReset.verify_token("", SECRET_KEY)
       end
     end
 
     it "lève InvalidTokenError pour une mauvaise clé" do
-      token = AloloCrAuth::PasswordReset.generate_token(TEST_EMAIL, SECRET_KEY)
-      expect_raises(AloloCrAuth::Token::InvalidTokenError) do
-        AloloCrAuth::PasswordReset.verify_token(token, "mauvaise_cle_suffisamment_longue_ici")
+      token = AloliCrAuth::PasswordReset.generate_token(TEST_EMAIL, SECRET_KEY)
+      expect_raises(AloliCrAuth::Token::InvalidTokenError) do
+        AloliCrAuth::PasswordReset.verify_token(token, "mauvaise_cle_suffisamment_longue_ici")
       end
     end
 
     it "lève InvalidTokenError pour un token JWT standard (mauvais type)" do
-      token = AloloCrAuth::Token.generate(secret: SECRET_KEY, sub: "1", email: TEST_EMAIL)
-      expect_raises(AloloCrAuth::Token::InvalidTokenError, "Type de token invalide") do
-        AloloCrAuth::PasswordReset.verify_token(token, SECRET_KEY)
+      token = AloliCrAuth::Token.generate(secret: SECRET_KEY, sub: "1", email: TEST_EMAIL)
+      expect_raises(AloliCrAuth::Token::InvalidTokenError, "Type de token invalide") do
+        AloliCrAuth::PasswordReset.verify_token(token, SECRET_KEY)
       end
     end
   end
 end
 
 # =============================================================================
-# Tests AloloCrAuth::UserManager
+# Tests AloliCrAuth::UserManager
 # =============================================================================
-describe AloloCrAuth::UserManager do
+describe AloliCrAuth::UserManager do
   describe ".validate_user" do
     it "retourne un tableau vide pour des données valides" do
-      errors = AloloCrAuth::UserManager.validate_user(
+      errors = AloliCrAuth::UserManager.validate_user(
         email: TEST_EMAIL,
         nom: TEST_NOM,
         prenom: TEST_PRENOM,
@@ -308,49 +308,49 @@ describe AloloCrAuth::UserManager do
     end
 
     it "signale un email vide" do
-      errors = AloloCrAuth::UserManager.validate_user(
+      errors = AloliCrAuth::UserManager.validate_user(
         email: "", nom: TEST_NOM, prenom: TEST_PRENOM, role: "admin"
       )
       errors.any? { |e| e.includes?("courriel") }.should be_true
     end
 
     it "signale un email invalide" do
-      errors = AloloCrAuth::UserManager.validate_user(
+      errors = AloliCrAuth::UserManager.validate_user(
         email: "invalide", nom: TEST_NOM, prenom: TEST_PRENOM, role: "admin"
       )
       errors.any? { |e| e.includes?("invalide") }.should be_true
     end
 
     it "signale un nom vide" do
-      errors = AloloCrAuth::UserManager.validate_user(
+      errors = AloliCrAuth::UserManager.validate_user(
         email: TEST_EMAIL, nom: "", prenom: TEST_PRENOM, role: "admin"
       )
       errors.any? { |e| e.includes?("nom") }.should be_true
     end
 
     it "signale un prénom vide" do
-      errors = AloloCrAuth::UserManager.validate_user(
+      errors = AloliCrAuth::UserManager.validate_user(
         email: TEST_EMAIL, nom: TEST_NOM, prenom: "", role: "admin"
       )
       errors.any? { |e| e.includes?("prénom") }.should be_true
     end
 
     it "signale un rôle invalide" do
-      errors = AloloCrAuth::UserManager.validate_user(
+      errors = AloliCrAuth::UserManager.validate_user(
         email: TEST_EMAIL, nom: TEST_NOM, prenom: TEST_PRENOM, role: "superuser"
       )
       errors.any? { |e| e.includes?("rôle") }.should be_true
     end
 
     it "accepte le rôle gestionnaire" do
-      errors = AloloCrAuth::UserManager.validate_user(
+      errors = AloliCrAuth::UserManager.validate_user(
         email: TEST_EMAIL, nom: TEST_NOM, prenom: TEST_PRENOM, role: "gestionnaire"
       )
       errors.should be_empty
     end
 
     it "valide aussi le mot de passe si fourni" do
-      errors = AloloCrAuth::UserManager.validate_user(
+      errors = AloliCrAuth::UserManager.validate_user(
         email: TEST_EMAIL, nom: TEST_NOM, prenom: TEST_PRENOM,
         role: "admin", password: "faible"
       )
@@ -360,21 +360,21 @@ describe AloloCrAuth::UserManager do
 
   describe ".hash_password et .verify_password" do
     it "hache et vérifie correctement un mot de passe" do
-      hash = AloloCrAuth::UserManager.hash_password(TEST_PASSWORD)
-      AloloCrAuth::UserManager.verify_password(TEST_PASSWORD, hash).should be_true
-      AloloCrAuth::UserManager.verify_password("MauvaisMotDePasse1", hash).should be_false
+      hash = AloliCrAuth::UserManager.hash_password(TEST_PASSWORD)
+      AloliCrAuth::UserManager.verify_password(TEST_PASSWORD, hash).should be_true
+      AloliCrAuth::UserManager.verify_password("MauvaisMotDePasse1", hash).should be_false
     end
   end
 
   describe ".generate_temp_password" do
     it "génère un mot de passe de la longueur demandée" do
-      pwd = AloloCrAuth::UserManager.generate_temp_password(12)
+      pwd = AloliCrAuth::UserManager.generate_temp_password(12)
       pwd.size.should eq(12)
     end
 
     it "génère des mots de passe différents à chaque appel" do
-      pwd1 = AloloCrAuth::UserManager.generate_temp_password
-      pwd2 = AloloCrAuth::UserManager.generate_temp_password
+      pwd1 = AloliCrAuth::UserManager.generate_temp_password
+      pwd2 = AloliCrAuth::UserManager.generate_temp_password
       pwd1.should_not eq(pwd2)
     end
   end

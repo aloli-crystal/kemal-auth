@@ -3,14 +3,14 @@ require "./password"
 require "./smtp_config"
 require "./password_reset"
 
-module AloloCrAuth
+module AloliCrAuth
   # Module de gestion des utilisateurs administrateurs.
   # Fournit des utilitaires pour la création, la validation et l'invitation
   # des utilisateurs via courriel.
   module UserManager
     VALID_ROLES = %w[admin gestionnaire]
 
-    # Hache un mot de passe via AloloCrAuth::Password.
+    # Hache un mot de passe via AloliCrAuth::Password.
     def self.hash_password(password : String) : String
       Password.hash(password)
     end

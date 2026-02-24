@@ -1,7 +1,7 @@
 require "jwt"
 require "json"
 
-module AloloCrAuth
+module AloliCrAuth
   # Gestion des tokens JWT pour l'authentification sans état.
   # Génère, vérifie et décode les tokens d'accès et de session.
   module Token
@@ -30,7 +30,7 @@ module AloloCrAuth
     # Génère un token JWT signé pour un utilisateur authentifié.
     #
     # ```
-    # token = AloloCrAuth::Token.generate(
+    # token = AloliCrAuth::Token.generate(
     #   secret: "ma_cle_secrete",
     #   sub: "42",
     #   email: "admin@gaya.fr",
@@ -62,7 +62,7 @@ module AloloCrAuth
     # Ce token a une durée de vie plus longue (72h par défaut).
     #
     # ```
-    # token = AloloCrAuth::Token.generate_reservation_token(
+    # token = AloliCrAuth::Token.generate_reservation_token(
     #   secret: "ma_cle_secrete",
     #   reservation_token: "abc123",
     #   expiry_hours: 72
@@ -88,7 +88,7 @@ module AloloCrAuth
     # Lève `InvalidTokenError` si le token est invalide, expiré ou mal formé.
     #
     # ```
-    # payload = AloloCrAuth::Token.decode(token, secret: "ma_cle_secrete")
+    # payload = AloliCrAuth::Token.decode(token, secret: "ma_cle_secrete")
     # puts payload.email
     # ```
     def self.decode(token : String, secret : String) : Payload
@@ -117,7 +117,7 @@ module AloloCrAuth
     # Retourne true si le token est valide et non expiré.
     #
     # ```
-    # AloloCrAuth::Token.valid?(token, secret: "ma_cle_secrete") # => true ou false
+    # AloliCrAuth::Token.valid?(token, secret: "ma_cle_secrete") # => true ou false
     # ```
     def self.valid?(token : String, secret : String) : Bool
       decode(token, secret)

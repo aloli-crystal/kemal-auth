@@ -1,6 +1,6 @@
 require "./token"
 
-module AloloCrAuth
+module AloliCrAuth
   # Gestion des sessions d'authentification via cookies HTTP.
   # Conçu pour fonctionner avec le framework Kemal.
   module Session
@@ -23,7 +23,7 @@ module AloloCrAuth
     # Retourne un objet HTTP::Cookie prêt à être ajouté à la réponse.
     #
     # ```
-    # cookie = AloloCrAuth::Session.create_cookie(token, expiry_hours: 8)
+    # cookie = AloliCrAuth::Session.create_cookie(token, expiry_hours: 8)
     # env.response.cookies << cookie
     # ```
     def self.create_cookie(
@@ -45,7 +45,7 @@ module AloloCrAuth
     # Crée un cookie de déconnexion (valeur vide, expiration passée).
     #
     # ```
-    # env.response.cookies << AloloCrAuth::Session.logout_cookie
+    # env.response.cookies << AloliCrAuth::Session.logout_cookie
     # ```
     def self.logout_cookie : HTTP::Cookie
       HTTP::Cookie.new(
@@ -62,7 +62,7 @@ module AloloCrAuth
     # Retourne un `SessionInfo` avec le résultat de la vérification.
     #
     # ```
-    # info = AloloCrAuth::Session.verify(cookies, secret: "ma_cle_secrete")
+    # info = AloliCrAuth::Session.verify(cookies, secret: "ma_cle_secrete")
     # if info.authenticated?
     #   puts info.payload.not_nil!.email
     # end
@@ -88,7 +88,7 @@ module AloloCrAuth
     # Vérifie si la session est authentifiée (version simplifiée).
     #
     # ```
-    # AloloCrAuth::Session.authenticated?(cookies, secret: "ma_cle_secrete")
+    # AloliCrAuth::Session.authenticated?(cookies, secret: "ma_cle_secrete")
     # ```
     def self.authenticated?(cookies : HTTP::Cookies, secret : String) : Bool
       verify(cookies, secret).authenticated?

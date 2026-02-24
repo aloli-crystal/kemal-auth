@@ -2,7 +2,7 @@ require "email"
 require "./token"
 require "./smtp_config"
 
-module AloloCrAuth
+module AloliCrAuth
   # Module de réinitialisation de mot de passe par courriel.
   # Génère un token JWT signé à durée limitée et envoie un courriel
   # avec un lien de réinitialisation.

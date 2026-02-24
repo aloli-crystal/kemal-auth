@@ -6,12 +6,12 @@ Bibliothèque d'authentification Crystal pour les applications Gaya.
 
 | Module | Description |
 |--------|-------------|
-| `AloloCrAuth::Password` | Hachage et validation BCrypt des mots de passe |
-| `AloloCrAuth::Token` | Génération et vérification de tokens JWT |
-| `AloloCrAuth::Session` | Gestion des sessions via cookies HTTP (Kemal) |
-| `AloloCrAuth::SmtpConfig` | Configuration du serveur SMTP (paramétrable) |
-| `AloloCrAuth::PasswordReset` | Récupération de mot de passe par courriel |
-| `AloloCrAuth::UserManager` | Gestion des utilisateurs administrateurs |
+| `AloliCrAuth::Password` | Hachage et validation BCrypt des mots de passe |
+| `AloliCrAuth::Token` | Génération et vérification de tokens JWT |
+| `AloliCrAuth::Session` | Gestion des sessions via cookies HTTP (Kemal) |
+| `AloliCrAuth::SmtpConfig` | Configuration du serveur SMTP (paramétrable) |
+| `AloliCrAuth::PasswordReset` | Récupération de mot de passe par courriel |
+| `AloliCrAuth::UserManager` | Gestion des utilisateurs administrateurs |
 
 ## Installation
 
@@ -36,7 +36,7 @@ La configuration SMTP peut être fournie de trois manières, par ordre de priori
 
 **1. A l'instanciation (priorité maximale) :**
 ```crystal
-smtp = AloloCrAuth::SmtpConfig.new(
+smtp = AloliCrAuth::SmtpConfig.new(
   host: "smtp.example.com",
   port: 587,
   username: "user@example.com",
@@ -49,7 +49,7 @@ smtp = AloloCrAuth::SmtpConfig.new(
 
 **2. Depuis un Hash (ex. : base de données) :**
 ```crystal
-smtp = AloloCrAuth::SmtpConfig.from_hash({
+smtp = AloliCrAuth::SmtpConfig.from_hash({
   "smtp_host"         => "smtp.example.com",
   "smtp_port"         => "587",
   "smtp_username"     => "user@example.com",
@@ -79,28 +79,28 @@ smtp = AloloCrAuth::SmtpConfig.from_hash({
 ```crystal
 require "aloli_cr_auth"
 
-hash = AloloCrAuth::Password.hash("MonMotDePasse1")
-AloloCrAuth::Password.verify("MonMotDePasse1", hash) # => true
-errors = AloloCrAuth::Password.validate("faible")
+hash = AloliCrAuth::Password.hash("MonMotDePasse1")
+AloliCrAuth::Password.verify("MonMotDePasse1", hash) # => true
+errors = AloliCrAuth::Password.validate("faible")
 ```
 
 ### Tokens JWT
 
 ```crystal
-token = AloloCrAuth::Token.generate(
+token = AloliCrAuth::Token.generate(
   secret: ENV["SESSION_SECRET"],
   sub: "1",
   email: "admin@gaya.fr",
   role: "admin"
 )
-payload = AloloCrAuth::Token.decode(token, ENV["SESSION_SECRET"])
+payload = AloliCrAuth::Token.decode(token, ENV["SESSION_SECRET"])
 ```
 
 ### Recuperation de mot de passe
 
 ```crystal
-smtp = AloloCrAuth::SmtpConfig.new(host: "smtp.example.com", ...)
-result = AloloCrAuth::PasswordReset.send_reset_email(
+smtp = AloliCrAuth::SmtpConfig.new(host: "smtp.example.com", ...)
+result = AloliCrAuth::PasswordReset.send_reset_email(
   email: "admin@gaya.fr",
   reset_url: "https://app.gaya.fr/admin/reset-password",
   secret: ENV["SESSION_SECRET"],
@@ -111,15 +111,15 @@ result = AloloCrAuth::PasswordReset.send_reset_email(
 ### Gestion des utilisateurs
 
 ```crystal
-errors = AloloCrAuth::UserManager.validate_user(
+errors = AloliCrAuth::UserManager.validate_user(
   email: "nouveau@gaya.fr", nom: "Martin", prenom: "Sophie", role: "gestionnaire"
 )
-AloloCrAuth::UserManager.send_invitation_email(
+AloliCrAuth::UserManager.send_invitation_email(
   email: "nouveau@gaya.fr", prenom: "Sophie",
   invitation_url: "https://app.gaya.fr/admin/set-password",
   secret: ENV["SESSION_SECRET"], smtp: smtp
 )
-temp_pwd = AloloCrAuth::UserManager.generate_temp_password
+temp_pwd = AloliCrAuth::UserManager.generate_temp_password
 ```
 
 ## Tests
