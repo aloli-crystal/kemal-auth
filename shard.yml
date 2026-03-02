@@ -1,15 +1,15 @@
-name: aloli_cr_auth
+name: crystal-kemal-auth
 version: 0.1.0
 description: |
-  Bibliothèque d'authentification pour les applications Aloli.
+  Bibliothèque d'authentification pour les applications avec kemal pour Aloli.
   Fournit la gestion des mots de passe (BCrypt), des tokens JWT,
   des sessions (cookies Kemal) et la récupération de mot de passe
   par courriel via un serveur SMTP configurable.
 
 authors:
-  - aloli
+  - Philippe Nénert <philippe@aloli.fr>
 
-crystal: ">= 1.19.1"
+crystal: ">= 1.18.1"
 
 license: MIT
 

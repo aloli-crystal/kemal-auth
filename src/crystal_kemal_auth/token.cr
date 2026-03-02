@@ -1,7 +1,7 @@
 require "jwt"
 require "json"
 
-module AloliCrAuth
+module CrystalKemalAuth
   # Gestion des tokens JWT pour l'authentification sans état.
   # Génère, vérifie et décode les tokens d'accès et de session.
   module Token
@@ -31,7 +31,7 @@ module AloliCrAuth
     # Lève `InvalidTokenError` si le token est invalide, expiré ou mal formé.
     #
     # ```
-    # payload = AloliCrAuth::Token.decode(token, secret: "ma_cle_secrete")
+    # payload = CrystalKemalAuth::Token.decode(token, secret: "ma_cle_secrete")
     # puts payload.email
     # ```
     def self.decode(token : String, secret : String) : Payload
@@ -41,11 +41,11 @@ module AloliCrAuth
       payload_hash, _header = JWT.decode(token, secret, JWT::Algorithm::HS256)
       hash = payload_hash.as_h
 
-      sub   = hash["sub"]?.try(&.as_s) || raise InvalidTokenError.new("Champ 'sub' manquant")
+      sub = hash["sub"]?.try(&.as_s) || raise InvalidTokenError.new("Champ 'sub' manquant")
       email = hash["email"]?.try(&.as_s) || ""
-      role  = hash["role"]?.try(&.as_s) || "admin"
-      exp   = hash["exp"]?.try(&.as_i64) || raise InvalidTokenError.new("Champ 'exp' manquant")
-      iat   = hash["iat"]?.try(&.as_i64) || 0_i64
+      role = hash["role"]?.try(&.as_s) || "admin"
+      exp = hash["exp"]?.try(&.as_i64) || raise InvalidTokenError.new("Champ 'exp' manquant")
+      iat = hash["iat"]?.try(&.as_i64) || 0_i64
 
       p = Payload.new(sub: sub, email: email, role: role, exp: exp, iat: iat)
       raise InvalidTokenError.new("Le token a expiré") if p.expired?
@@ -59,7 +59,7 @@ module AloliCrAuth
     # Génère un token JWT signé pour un utilisateur authentifié.
     #
     # ```
-    # token = AloliCrAuth::Token.generate(
+    # token = CrystalKemalAuth::Token.generate(
     #   secret: "ma_cle_secrete",
     #   sub: "42",
     #   email: "admin@gaya.fr",
@@ -71,7 +71,7 @@ module AloliCrAuth
       sub : String,
       email : String,
       role : String = "admin",
-      expiry_hours : Int32 = DEFAULT_EXPIRY_HOURS
+      expiry_hours : Int32 = DEFAULT_EXPIRY_HOURS,
     ) : String
       raise ArgumentError.new("La clé secrète ne peut pas être vide") if secret.empty?
       raise ArgumentError.new("Le sujet (sub) ne peut pas être vide") if sub.empty?
@@ -82,7 +82,7 @@ module AloliCrAuth
         "email" => email,
         "role"  => role,
         "exp"   => (Time.utc + expiry_hours.hours).to_unix,
-        "iat"   => now
+        "iat"   => now,
       }
       JWT.encode(payload, secret, JWT::Algorithm::HS256)
     end
@@ -91,7 +91,7 @@ module AloliCrAuth
     # Ce token a une durée de vie plus longue (72h par défaut).
     #
     # ```
-    # token = AloliCrAuth::Token.generate_reservation_token(
+    # token = CrystalKemalAuth::Token.generate_reservation_token(
     #   secret: "ma_cle_secrete",
     #   reservation_token: "abc123",
     #   expiry_hours: 72
@@ -100,15 +100,15 @@ module AloliCrAuth
     def self.generate_reservation_token(
       secret : String,
       reservation_token : String,
-      expiry_hours : Int32 = 72
+      expiry_hours : Int32 = 72,
     ) : String
       raise ArgumentError.new("La clé secrète ne peut pas être vide") if secret.empty?
 
       payload = {
-        "sub"               => reservation_token,
-        "type"              => "reservation",
-        "exp"               => (Time.utc + expiry_hours.hours).to_unix,
-        "iat"               => Time.utc.to_unix
+        "sub"  => reservation_token,
+        "type" => "reservation",
+        "exp"  => (Time.utc + expiry_hours.hours).to_unix,
+        "iat"  => Time.utc.to_unix,
       }
       JWT.encode(payload, secret, JWT::Algorithm::HS256)
     end
@@ -117,7 +117,7 @@ module AloliCrAuth
     # Retourne true si le token est valide et non expiré.
     #
     # ```
-    # AloliCrAuth::Token.valid?(token, secret: "ma_cle_secrete") # => true ou false
+    # CrystalKemalAuth::Token.valid?(token, secret: "ma_cle_secrete") # => true ou false
     # ```
     def self.valid?(token : String, secret : String) : Bool
       decode(token, secret)

@@ -3,7 +3,7 @@ require "./password"
 require "./password_reset"
 require "./smtp_config"
 
-module AloliCrAuth
+module CrystalKemalAuth
   # Module de gestion des utilisateurs administrateurs.
   # Fournit des utilitaires pour la création, la validation et l'invitation
   # des utilisateurs via courriel.
@@ -15,7 +15,7 @@ module AloliCrAuth
       Random::Secure.hex(length)
     end
 
-    # Hache un mot de passe via AloliCrAuth::Password.
+    # Hache un mot de passe via CrystalKemalAuth::Password.
     def self.hash_password(password : String) : String
       Password.hash(password)
     end
@@ -28,7 +28,7 @@ module AloliCrAuth
       secret : String,
       smtp : SmtpConfig,
       invited_by : String = "",
-      app_name : String = "La Table de Gaya"
+      app_name : String = "La Table de Gaya",
     ) : PasswordReset::SendResult
       return PasswordReset::SendResult.new(success: false, error: "Configuration SMTP manquante.") if smtp.host.empty?
 

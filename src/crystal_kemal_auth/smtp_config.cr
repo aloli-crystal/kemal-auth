@@ -1,10 +1,10 @@
-module AloliCrAuth
+module CrystalKemalAuth
   # Configuration du serveur SMTP pour l'envoi de courriels.
   # Toutes les valeurs sont paramétrables à l'instanciation ou
   # via les variables d'environnement correspondantes.
   #
   # ```
-  # config = AloliCrAuth::SmtpConfig.new(
+  # config = CrystalKemalAuth::SmtpConfig.new(
   #   host: "smtp.example.com",
   #   port: 587,
   #   username: "user@example.com",
@@ -31,7 +31,7 @@ module AloliCrAuth
       @port : Int32 = ENV.fetch("SMTP_PORT", "587").to_i,
       @use_starttls : Bool = ENV.fetch("SMTP_STARTTLS", "true") == "true",
       @use_tls : Bool = ENV.fetch("SMTP_TLS", "false") == "true",
-      @username : String = ENV.fetch("SMTP_USERNAME", "")
+      @username : String = ENV.fetch("SMTP_USERNAME", ""),
     )
     end
 
@@ -39,11 +39,11 @@ module AloliCrAuth
     # Utile pour charger la configuration depuis une base de données.
     #
     # ```
-    # config = AloliCrAuth::SmtpConfig.from_hash({
+    # config = CrystalKemalAuth::SmtpConfig.from_hash({
     #   "smtp_host"     => "smtp.example.com",
     #   "smtp_port"     => "587",
     #   "smtp_username" => "user@example.com",
-    #   "smtp_password" => "secret"
+    #   "smtp_password" => "secret",
     # })
     # ```
     def self.from_hash(params : Hash(String, String)) : SmtpConfig

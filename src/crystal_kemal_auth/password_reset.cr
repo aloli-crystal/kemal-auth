@@ -2,7 +2,7 @@ require "email"
 require "./smtp_config"
 require "./token"
 
-module AloliCrAuth
+module CrystalKemalAuth
   # Module de réinitialisation de mot de passe par courriel.
   # Génère un token JWT signé à durée limitée et envoie un courriel
   # avec un lien de réinitialisation.
@@ -32,7 +32,7 @@ module AloliCrAuth
       secret : String,
       smtp : SmtpConfig,
       app_name : String = "La Table de Gaya",
-      expiry : Time::Span = DEFAULT_EXPIRY
+      expiry : Time::Span = DEFAULT_EXPIRY,
     ) : SendResult
       return SendResult.new(success: false, error: "Configuration SMTP manquante.") if smtp.host.empty?
 

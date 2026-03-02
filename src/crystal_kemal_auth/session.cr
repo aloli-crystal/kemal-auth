@@ -1,6 +1,6 @@
 require "./token"
 
-module AloliCrAuth
+module CrystalKemalAuth
   # Gestion des sessions d'authentification via cookies HTTP.
   # Conçu pour fonctionner avec le framework Kemal.
   module Session
@@ -22,7 +22,7 @@ module AloliCrAuth
     # Vérifie si la session est authentifiée (version simplifiée).
     #
     # ```
-    # AloliCrAuth::Session.authenticated?(cookies, secret: "ma_cle_secrete")
+    # CrystalKemalAuth::Session.authenticated?(cookies, secret: "ma_cle_secrete")
     # ```
     def self.authenticated?(cookies : HTTP::Cookies, secret : String) : Bool
       verify(cookies, secret).authenticated?
@@ -32,13 +32,13 @@ module AloliCrAuth
     # Retourne un objet HTTP::Cookie prêt à être ajouté à la réponse.
     #
     # ```
-    # cookie = AloliCrAuth::Session.create_cookie(token, expiry_hours: 8)
+    # cookie = CrystalKemalAuth::Session.create_cookie(token, expiry_hours: 8)
     # env.response.cookies << cookie
     # ```
     def self.create_cookie(
       token : String,
       expiry_hours : Int32 = Token::DEFAULT_EXPIRY_HOURS,
-      secure : Bool = COOKIE_SECURE
+      secure : Bool = COOKIE_SECURE,
     ) : HTTP::Cookie
       HTTP::Cookie.new(
         name: COOKIE_NAME,
@@ -54,7 +54,7 @@ module AloliCrAuth
     # Crée un cookie de déconnexion (valeur vide, expiration passée).
     #
     # ```
-    # env.response.cookies << AloliCrAuth::Session.logout_cookie
+    # env.response.cookies << CrystalKemalAuth::Session.logout_cookie
     # ```
     def self.logout_cookie : HTTP::Cookie
       HTTP::Cookie.new(
@@ -71,14 +71,14 @@ module AloliCrAuth
     # Retourne un `SessionInfo` avec le résultat de la vérification.
     #
     # ```
-    # info = AloliCrAuth::Session.verify(cookies, secret: "ma_cle_secrete")
+    # info = CrystalKemalAuth::Session.verify(cookies, secret: "ma_cle_secrete")
     # if info.authenticated?
     #   puts info.payload.not_nil!.email
     # end
     # ```
     def self.verify(
       cookies : HTTP::Cookies,
-      secret : String
+      secret : String,
     ) : SessionInfo
       token = cookies[COOKIE_NAME]?.try(&.value)
 
