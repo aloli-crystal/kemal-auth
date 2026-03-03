@@ -1,10 +1,10 @@
-module CrystalKemalAuth
+module KemalAuth
   # Configuration du serveur SMTP pour l'envoi de courriels.
   # Toutes les valeurs sont paramétrables à l'instanciation ou
   # via les variables d'environnement correspondantes.
   #
   # ```
-  # config = CrystalKemalAuth::SmtpConfig.new(
+  # config = KemalAuth::SmtpConfig.new(
   #   host: "smtp.example.com",
   #   port: 587,
   #   username: "user@example.com",
@@ -39,7 +39,7 @@ module CrystalKemalAuth
     # Utile pour charger la configuration depuis une base de données.
     #
     # ```
-    # config = CrystalKemalAuth::SmtpConfig.from_hash({
+    # config = KemalAuth::SmtpConfig.from_hash({
     #   "smtp_host"     => "smtp.example.com",
     #   "smtp_port"     => "587",
     #   "smtp_username" => "user@example.com",

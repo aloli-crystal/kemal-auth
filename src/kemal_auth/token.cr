@@ -1,7 +1,7 @@
 require "jwt"
 require "json"
 
-module CrystalKemalAuth
+module KemalAuth
   # Gestion des tokens JWT pour l'authentification sans état.
   # Génère, vérifie et décode les tokens d'accès et de session.
   module Token
@@ -31,7 +31,7 @@ module CrystalKemalAuth
     # Lève `InvalidTokenError` si le token est invalide, expiré ou mal formé.
     #
     # ```
-    # payload = CrystalKemalAuth::Token.decode(token, secret: "ma_cle_secrete")
+    # payload = KemalAuth::Token.decode(token, secret: "ma_cle_secrete")
     # puts payload.email
     # ```
     def self.decode(token : String, secret : String) : Payload
@@ -59,7 +59,7 @@ module CrystalKemalAuth
     # Génère un token JWT signé pour un utilisateur authentifié.
     #
     # ```
-    # token = CrystalKemalAuth::Token.generate(
+    # token = KemalAuth::Token.generate(
     #   secret: "ma_cle_secrete",
     #   sub: "42",
     #   email: "admin@gaya.fr",
@@ -91,7 +91,7 @@ module CrystalKemalAuth
     # Ce token a une durée de vie plus longue (72h par défaut).
     #
     # ```
-    # token = CrystalKemalAuth::Token.generate_reservation_token(
+    # token = KemalAuth::Token.generate_reservation_token(
     #   secret: "ma_cle_secrete",
     #   reservation_token: "abc123",
     #   expiry_hours: 72
@@ -117,7 +117,7 @@ module CrystalKemalAuth
     # Retourne true si le token est valide et non expiré.
     #
     # ```
-    # CrystalKemalAuth::Token.valid?(token, secret: "ma_cle_secrete") # => true ou false
+    # KemalAuth::Token.valid?(token, secret: "ma_cle_secrete") # => true ou false
     # ```
     def self.valid?(token : String, secret : String) : Bool
       decode(token, secret)

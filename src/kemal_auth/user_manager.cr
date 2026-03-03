@@ -3,7 +3,7 @@ require "./password"
 require "./password_reset"
 require "./smtp_config"
 
-module CrystalKemalAuth
+module KemalAuth
   # Module de gestion des utilisateurs administrateurs.
   # Fournit des utilitaires pour la création, la validation et l'invitation
   # des utilisateurs via courriel.
@@ -15,7 +15,7 @@ module CrystalKemalAuth
       Random::Secure.hex(length)
     end
 
-    # Hache un mot de passe via CrystalKemalAuth::Password.
+    # Hache un mot de passe via KemalAuth::Password.
     def self.hash_password(password : String) : String
       Password.hash(password)
     end

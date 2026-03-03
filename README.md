@@ -1,4 +1,4 @@
-# aloli-cr-auth
+# kemal-auth
 
 Bibliothèque d'authentification Crystal pour les applications Gaya.
 
@@ -6,12 +6,12 @@ Bibliothèque d'authentification Crystal pour les applications Gaya.
 
 | Module | Description |
 |--------|-------------|
-| `AloliCrAuth::Password` | Hachage et validation BCrypt des mots de passe |
-| `AloliCrAuth::Token` | Génération et vérification de tokens JWT |
-| `AloliCrAuth::Session` | Gestion des sessions via cookies HTTP (Kemal) |
-| `AloliCrAuth::SmtpConfig` | Configuration du serveur SMTP (paramétrable) |
-| `AloliCrAuth::PasswordReset` | Récupération de mot de passe par courriel |
-| `AloliCrAuth::UserManager` | Gestion des utilisateurs administrateurs |
+| `KemalAuth::Password` | Hachage et validation BCrypt des mots de passe |
+| `KemalAuth::Token` | Génération et vérification de tokens JWT |
+| `KemalAuth::Session` | Gestion des sessions via cookies HTTP (Kemal) |
+| `KemalAuth::SmtpConfig` | Configuration du serveur SMTP (paramétrable) |
+| `KemalAuth::PasswordReset` | Récupération de mot de passe par courriel |
+| `KemalAuth::UserManager` | Gestion des utilisateurs administrateurs |
 
 ## Installation
 
@@ -36,7 +36,7 @@ La configuration SMTP peut être fournie de trois manières, par ordre de priori
 
 **1. A l'instanciation (priorité maximale) :**
 ```crystal
-smtp = AloliCrAuth::SmtpConfig.new(
+smtp = KemalAuth::SmtpConfig.new(
   host: "smtp.example.com",
   port: 587,
   username: "user@example.com",
@@ -49,7 +49,7 @@ smtp = AloliCrAuth::SmtpConfig.new(
 
 **2. Depuis un Hash (ex. : base de données) :**
 ```crystal
-smtp = AloliCrAuth::SmtpConfig.from_hash({
+smtp = KemalAuth::SmtpConfig.from_hash({
   "smtp_host"         => "smtp.example.com",
   "smtp_port"         => "587",
   "smtp_username"     => "user@example.com",
@@ -79,28 +79,28 @@ smtp = AloliCrAuth::SmtpConfig.from_hash({
 ```crystal
 require "aloli_cr_auth"
 
-hash = AloliCrAuth::Password.hash("MonMotDePasse1")
-AloliCrAuth::Password.verify("MonMotDePasse1", hash) # => true
-errors = AloliCrAuth::Password.validate("faible")
+hash = KemalAuth::Password.hash("MonMotDePasse1")
+KemalAuth::Password.verify("MonMotDePasse1", hash) # => true
+errors = KemalAuth::Password.validate("faible")
 ```
 
 ### Tokens JWT
 
 ```crystal
-token = AloliCrAuth::Token.generate(
+token = KemalAuth::Token.generate(
   secret: ENV["SESSION_SECRET"],
   sub: "1",
   email: "admin@gaya.fr",
   role: "admin"
 )
-payload = AloliCrAuth::Token.decode(token, ENV["SESSION_SECRET"])
+payload = KemalAuth::Token.decode(token, ENV["SESSION_SECRET"])
 ```
 
 ### Recuperation de mot de passe
 
 ```crystal
-smtp = AloliCrAuth::SmtpConfig.new(host: "smtp.example.com", ...)
-result = AloliCrAuth::PasswordReset.send_reset_email(
+smtp = KemalAuth::SmtpConfig.new(host: "smtp.example.com", ...)
+result = KemalAuth::PasswordReset.send_reset_email(
   email: "admin@gaya.fr",
   reset_url: "https://app.gaya.fr/admin/reset-password",
   secret: ENV["SESSION_SECRET"],
@@ -111,15 +111,15 @@ result = AloliCrAuth::PasswordReset.send_reset_email(
 ### Gestion des utilisateurs
 
 ```crystal
-errors = AloliCrAuth::UserManager.validate_user(
+errors = KemalAuth::UserManager.validate_user(
   email: "nouveau@gaya.fr", nom: "Martin", prenom: "Sophie", role: "gestionnaire"
 )
-AloliCrAuth::UserManager.send_invitation_email(
+KemalAuth::UserManager.send_invitation_email(
   email: "nouveau@gaya.fr", prenom: "Sophie",
   invitation_url: "https://app.gaya.fr/admin/set-password",
   secret: ENV["SESSION_SECRET"], smtp: smtp
 )
-temp_pwd = AloliCrAuth::UserManager.generate_temp_password
+temp_pwd = KemalAuth::UserManager.generate_temp_password
 ```
 
 ## Tests

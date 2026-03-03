@@ -1,6 +1,6 @@
 require "./token"
 
-module CrystalKemalAuth
+module KemalAuth
   # Gestion des sessions d'authentification via cookies HTTP.
   # Conçu pour fonctionner avec le framework Kemal.
   module Session
@@ -22,7 +22,7 @@ module CrystalKemalAuth
     # Vérifie si la session est authentifiée (version simplifiée).
     #
     # ```
-    # CrystalKemalAuth::Session.authenticated?(cookies, secret: "ma_cle_secrete")
+    # KemalAuth::Session.authenticated?(cookies, secret: "ma_cle_secrete")
     # ```
     def self.authenticated?(cookies : HTTP::Cookies, secret : String) : Bool
       verify(cookies, secret).authenticated?
@@ -32,7 +32,7 @@ module CrystalKemalAuth
     # Retourne un objet HTTP::Cookie prêt à être ajouté à la réponse.
     #
     # ```
-    # cookie = CrystalKemalAuth::Session.create_cookie(token, expiry_hours: 8)
+    # cookie = KemalAuth::Session.create_cookie(token, expiry_hours: 8)
     # env.response.cookies << cookie
     # ```
     def self.create_cookie(
@@ -54,7 +54,7 @@ module CrystalKemalAuth
     # Crée un cookie de déconnexion (valeur vide, expiration passée).
     #
     # ```
-    # env.response.cookies << CrystalKemalAuth::Session.logout_cookie
+    # env.response.cookies << KemalAuth::Session.logout_cookie
     # ```
     def self.logout_cookie : HTTP::Cookie
       HTTP::Cookie.new(
@@ -71,7 +71,7 @@ module CrystalKemalAuth
     # Retourne un `SessionInfo` avec le résultat de la vérification.
     #
     # ```
-    # info = CrystalKemalAuth::Session.verify(cookies, secret: "ma_cle_secrete")
+    # info = KemalAuth::Session.verify(cookies, secret: "ma_cle_secrete")
     # if info.authenticated?
     #   puts info.payload.not_nil!.email
     # end

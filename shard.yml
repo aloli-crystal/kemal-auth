@@ -1,4 +1,4 @@
-name: crystal-kemal-auth
+name: kemal-auth
 version: 0.1.0
 description: |
   Bibliothèque d'authentification pour les applications avec kemal pour Aloli.
