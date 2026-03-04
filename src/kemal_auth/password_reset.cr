@@ -13,8 +13,8 @@ module KemalAuth
 
     # Génère un token de réinitialisation JWT.
     def self.generate_token(email : String, secret : String, expiry : Time::Span = DEFAULT_EXPIRY) : String
-      raise ArgumentError.new("L'email ne peut pas être vide") if email.empty?
-      raise ArgumentError.new("Le secret ne peut pas être vide") if secret.empty?
+      raise ArgumentError.new("L'adresse courriel ne peut pas être vide") if email.empty?
+      raise ArgumentError.new("La clé secrète ne peut pas être vide") if secret.empty?
       expiry_hours = [1, (expiry.total_hours).ceil.to_i].max
       Token.generate(
         secret: secret,

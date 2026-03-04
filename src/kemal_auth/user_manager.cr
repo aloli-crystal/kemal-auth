@@ -11,8 +11,10 @@ module KemalAuth
     VALID_ROLES = %w[admin gestionnaire]
 
     # Génère un mot de passe temporaire sécurisé.
+    # La longueur correspond au nombre exact de caractères retournés.
     def self.generate_temp_password(length : Int32 = 16) : String
-      Random::Secure.hex(length)
+      chars = (('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a)
+      Array.new(length) { chars.sample(Random::Secure) }.join
     end
 
     # Hache un mot de passe via KemalAuth::Password.
