@@ -1,41 +1,62 @@
-# kemal_auth
+= kemal_auth
+:toc: left
+:toclevels: 2
+:source-highlighter: rouge
 
 Bibliothèque d'authentification Crystal pour les applications Gaya.
 
-## Fonctionnalités
+== Fonctionnalités
 
-| Module | Description |
-|--------|-------------|
-| `KemalAuth::Password` | Hachage et validation BCrypt des mots de passe |
-| `KemalAuth::Token` | Génération et vérification de tokens JWT |
-| `KemalAuth::Session` | Gestion des sessions via cookies HTTP (Kemal) |
-| `KemalAuth::SmtpConfig` | Configuration du serveur SMTP (paramétrable) |
-| `KemalAuth::PasswordReset` | Récupération de mot de passe par courriel |
-| `KemalAuth::UserManager` | Gestion des utilisateurs administrateurs |
+[cols="1,3"]
+|===
+| Module | Description
 
-## Installation
+| `KemalAuth::Password`
+| Hachage et validation BCrypt des mots de passe
+
+| `KemalAuth::Token`
+| Génération et vérification de tokens JWT
+
+| `KemalAuth::Session`
+| Gestion des sessions via cookies HTTP (Kemal)
+
+| `KemalAuth::SmtpConfig`
+| Configuration du serveur SMTP (paramétrable)
+
+| `KemalAuth::PasswordReset`
+| Récupération de mot de passe par courriel
+
+| `KemalAuth::UserManager`
+| Gestion des utilisateurs administrateurs
+|===
+
+== Installation
 
 Ajouter dans votre `shard.yml` :
 
-```yaml
+[source,yaml]
+----
 dependencies:
   kemal_auth:
     github: aloli/kemal_auth
     branch: developpement
-```
+----
 
 Puis exécuter :
 
-```bash
+[source,bash]
+----
 shards install
-```
+----
 
-## Configuration SMTP
+== Configuration SMTP
 
 La configuration SMTP peut être fournie de trois manières, par ordre de priorité :
 
-**1. A l'instanciation (priorité maximale) :**
-```crystal
+=== 1. A l'instanciation (priorité maximale)
+
+[source,crystal]
+----
 smtp = KemalAuth::SmtpConfig.new(
   host: "smtp.example.com",
   port: 587,
@@ -45,10 +66,12 @@ smtp = KemalAuth::SmtpConfig.new(
   from_name: "La Table de Gaya",
   use_starttls: true
 )
-```
+----
 
-**2. Depuis un Hash (ex. : base de données) :**
-```crystal
+=== 2. Depuis un Hash (ex. : base de données)
+
+[source,crystal]
+----
 smtp = KemalAuth::SmtpConfig.from_hash({
   "smtp_host"         => "smtp.example.com",
   "smtp_port"         => "587",
@@ -57,36 +80,64 @@ smtp = KemalAuth::SmtpConfig.from_hash({
   "smtp_from_address" => "noreply@gaya.fr",
   "smtp_from_name"    => "La Table de Gaya"
 })
-```
+----
 
-**3. Via variables d'environnement (valeurs par défaut) :**
+=== 3. Via variables d'environnement (valeurs par défaut)
 
-| Variable | Description | Defaut |
-|----------|-------------|--------|
-| `SMTP_HOST` | Hote du serveur SMTP | `localhost` |
-| `SMTP_PORT` | Port SMTP | `587` |
-| `SMTP_USERNAME` | Nom d'utilisateur | _(vide)_ |
-| `SMTP_PASSWORD` | Mot de passe | _(vide)_ |
-| `SMTP_FROM_ADDRESS` | Adresse d'expedition | `noreply@leschampsdegaya.com` |
-| `SMTP_FROM_NAME` | Nom d'expediteur | `La Table de Gaya` |
-| `SMTP_TLS` | Activer TLS/SMTPS | `false` |
-| `SMTP_STARTTLS` | Activer STARTTLS | `true` |
+[cols="1,2,1"]
+|===
+| Variable | Description | Défaut
 
-## Utilisation
+| `SMTP_HOST`
+| Hôte du serveur SMTP
+| `localhost`
 
-### Gestion des mots de passe
+| `SMTP_PORT`
+| Port SMTP
+| `587`
 
-```crystal
+| `SMTP_USERNAME`
+| Nom d'utilisateur
+| _(vide)_
+
+| `SMTP_PASSWORD`
+| Mot de passe
+| _(vide)_
+
+| `SMTP_FROM_ADDRESS`
+| Adresse d'expédition
+| `noreply@leschampsdegaya.com`
+
+| `SMTP_FROM_NAME`
+| Nom d'expéditeur
+| `La Table de Gaya`
+
+| `SMTP_TLS`
+| Activer TLS/SMTPS
+| `false`
+
+| `SMTP_STARTTLS`
+| Activer STARTTLS
+| `true`
+|===
+
+== Utilisation
+
+=== Gestion des mots de passe
+
+[source,crystal]
+----
 require "kemal_auth"
 
 hash = KemalAuth::Password.hash("MonMotDePasse1")
 KemalAuth::Password.verify("MonMotDePasse1", hash) # => true
 errors = KemalAuth::Password.validate("faible")
-```
+----
 
-### Tokens JWT
+=== Tokens JWT
 
-```crystal
+[source,crystal]
+----
 token = KemalAuth::Token.generate(
   secret: ENV["SESSION_SECRET"],
   sub: "1",
@@ -94,11 +145,12 @@ token = KemalAuth::Token.generate(
   role: "admin"
 )
 payload = KemalAuth::Token.decode(token, ENV["SESSION_SECRET"])
-```
+----
 
-### Recuperation de mot de passe
+=== Récupération de mot de passe
 
-```crystal
+[source,crystal]
+----
 smtp = KemalAuth::SmtpConfig.new(host: "smtp.example.com", ...)
 result = KemalAuth::PasswordReset.send_reset_email(
   email: "admin@gaya.fr",
@@ -106,11 +158,12 @@ result = KemalAuth::PasswordReset.send_reset_email(
   secret: ENV["SESSION_SECRET"],
   smtp: smtp
 )
-```
+----
 
-### Gestion des utilisateurs
+=== Gestion des utilisateurs
 
-```crystal
+[source,crystal]
+----
 errors = KemalAuth::UserManager.validate_user(
   email: "nouveau@gaya.fr", nom: "Martin", prenom: "Sophie", role: "gestionnaire"
 )
@@ -120,16 +173,17 @@ KemalAuth::UserManager.send_invitation_email(
   secret: ENV["SESSION_SECRET"], smtp: smtp
 )
 temp_pwd = KemalAuth::UserManager.generate_temp_password
-```
+----
 
-## Tests
+== Tests
 
-```bash
+[source,bash]
+----
 crystal spec
-```
+----
 
 52 exemples couvrant tous les modules.
 
-## Licence
+== Licence
 
 MIT
