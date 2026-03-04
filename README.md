@@ -1,4 +1,4 @@
-# kemal-auth
+# kemal_auth
 
 Bibliothèque d'authentification Crystal pour les applications Gaya.
 
@@ -19,8 +19,8 @@ Ajouter dans votre `shard.yml` :
 
 ```yaml
 dependencies:
-  aloli_cr_auth:
-    github: aloli/aloli-cr-auth
+  kemal_auth:
+    github: aloli/kemal_auth
     branch: developpement
 ```
 
@@ -77,7 +77,7 @@ smtp = KemalAuth::SmtpConfig.from_hash({
 ### Gestion des mots de passe
 
 ```crystal
-require "aloli_cr_auth"
+require "kemal_auth"
 
 hash = KemalAuth::Password.hash("MonMotDePasse1")
 KemalAuth::Password.verify("MonMotDePasse1", hash) # => true
