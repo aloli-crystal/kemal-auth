@@ -1,10 +1,10 @@
-name: kemal_auth
+name: kemal-auth
 version: 0.1.0
 description: |
-  Bibliothèque d'authentification pour les applications avec kemal pour Aloli.
-  Fournit la gestion des mots de passe (BCrypt), des tokens JWT,
-  des sessions (cookies Kemal) et la récupération de mot de passe
-  par courriel via un serveur SMTP configurable.
+  Authentication library for Kemal web applications.
+  Provides password management (BCrypt with CNIL-compliant rules),
+  JWT tokens, session management (Kemal cookies), user invitations,
+  and password reset via configurable SMTP.
 
 authors:
   - Philippe Nénert <philippe@aloli.fr>

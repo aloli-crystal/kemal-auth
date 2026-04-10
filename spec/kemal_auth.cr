@@ -24,7 +24,7 @@ describe KemalAuth::Password do
     end
 
     it "lève une erreur si le mot de passe est trop court" do
-      expect_raises(ArgumentError, "8 caractères") do
+      expect_raises(ArgumentError, "12 caractères") do
         KemalAuth::Password.hash("abc")
       end
     end
@@ -67,7 +67,7 @@ describe KemalAuth::Password do
 
     it "signale un mot de passe trop court" do
       errors = KemalAuth::Password.validate("Ab1")
-      errors.any? { |e| e.includes?("8 caractères") }.should be_true
+      errors.any? { |e| e.includes?("12 caractères") }.should be_true
     end
 
     it "signale l'absence de majuscule" do
