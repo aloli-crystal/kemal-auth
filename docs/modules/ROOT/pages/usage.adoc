@@ -1,0 +1,104 @@
+= Usage
+
+== Password Management
+
+[source,crystal]
+----
+require "kemal_auth"
+
+hash = KemalAuth::Password.hash("MyStr0ng!Pass")
+KemalAuth::Password.verify("MyStr0ng!Pass", hash) # => true
+
+errors = KemalAuth::Password.validate("weak")
+# => ["Le mot de passe doit contenir au moins 12 caractères", ...]
+----
+
+== JWT Tokens
+
+[source,crystal]
+----
+token = KemalAuth::Token.generate(
+  secret: ENV["SESSION_SECRET"],
+  sub: "1",
+  email: "user@example.com",
+  role: "admin"
+)
+payload = KemalAuth::Token.decode(token, ENV["SESSION_SECRET"])
+----
+
+== SMTP Configuration
+
+SMTP settings can be provided in three ways (in order of priority):
+
+=== 1. At Instantiation
+
+[source,crystal]
+----
+smtp = KemalAuth::SmtpConfig.new(
+  host: "smtp.example.com",
+  port: 587,
+  username: "user@example.com",
+  password: "secret",
+  from_address: "noreply@example.com",
+  from_name: "My App",
+  use_starttls: true
+)
+----
+
+=== 2. From a Hash
+
+[source,crystal]
+----
+smtp = KemalAuth::SmtpConfig.from_hash({
+  "smtp_host"         => "smtp.example.com",
+  "smtp_port"         => "587",
+  "smtp_username"     => "user@example.com",
+  "smtp_password"     => "secret",
+  "smtp_from_address" => "noreply@example.com",
+  "smtp_from_name"    => "My App"
+})
+----
+
+=== 3. Via Environment Variables
+
+[cols="1,2,1"]
+|===
+| Variable | Description | Default
+
+| `SMTP_HOST` | SMTP server host | `localhost`
+| `SMTP_PORT` | SMTP port | `587`
+| `SMTP_USERNAME` | Username | _(empty)_
+| `SMTP_PASSWORD` | Password | _(empty)_
+| `SMTP_FROM_ADDRESS` | Sender address | `noreply@example.com`
+| `SMTP_FROM_NAME` | Sender name | `My App`
+| `SMTP_TLS` | Enable TLS/SMTPS | `false`
+| `SMTP_STARTTLS` | Enable STARTTLS | `true`
+|===
+
+== Password Reset
+
+[source,crystal]
+----
+smtp = KemalAuth::SmtpConfig.new(host: "smtp.example.com", ...)
+result = KemalAuth::PasswordReset.send_reset_email(
+  email: "user@example.com",
+  reset_url: "https://myapp.com/reset-password",
+  secret: ENV["SESSION_SECRET"],
+  smtp: smtp
+)
+----
+
+== User Management
+
+[source,crystal]
+----
+errors = KemalAuth::UserManager.validate_user(
+  email: "new@example.com", nom: "Doe", prenom: "Jane", role: "admin"
+)
+KemalAuth::UserManager.send_invitation_email(
+  email: "new@example.com", prenom: "Jane",
+  invitation_url: "https://myapp.com/set-password",
+  secret: ENV["SESSION_SECRET"], smtp: smtp
+)
+temp_pwd = KemalAuth::UserManager.generate_temp_password
+----

@@ -1,0 +1,88 @@
+= Utilisation
+
+== Gestion des Mots de Passe
+
+[source,crystal]
+----
+require "kemal_auth"
+
+hash = KemalAuth::Password.hash("MonMotDePasse1!")
+KemalAuth::Password.verify("MonMotDePasse1!", hash) # => true
+
+errors = KemalAuth::Password.validate("faible")
+# => ["Le mot de passe doit contenir au moins 12 caracteres.", ...]
+----
+
+== Tokens JWT
+
+[source,crystal]
+----
+token = KemalAuth::Token.generate(
+  secret: ENV["SESSION_SECRET"],
+  sub: "1",
+  email: "user@example.com",
+  role: "admin"
+)
+payload = KemalAuth::Token.decode(token, ENV["SESSION_SECRET"])
+----
+
+== Configuration SMTP
+
+=== A l'Instanciation
+
+[source,crystal]
+----
+smtp = KemalAuth::SmtpConfig.new(
+  host: "smtp.example.com",
+  port: 587,
+  username: "user@example.com",
+  password: "secret",
+  from_address: "noreply@example.com",
+  from_name: "Mon Application",
+  use_starttls: true
+)
+----
+
+=== Variables d'Environnement
+
+[cols="1,2,1"]
+|===
+| Variable | Description | Defaut
+
+| `SMTP_HOST` | Hote du serveur SMTP | `localhost`
+| `SMTP_PORT` | Port SMTP | `587`
+| `SMTP_USERNAME` | Nom d'utilisateur | _(vide)_
+| `SMTP_PASSWORD` | Mot de passe | _(vide)_
+| `SMTP_FROM_ADDRESS` | Adresse d'expedition | `noreply@example.com`
+| `SMTP_FROM_NAME` | Nom d'expediteur | `Mon Application`
+| `SMTP_TLS` | Activer TLS | `false`
+| `SMTP_STARTTLS` | Activer STARTTLS | `true`
+|===
+
+== Recuperation de Mot de Passe
+
+[source,crystal]
+----
+smtp = KemalAuth::SmtpConfig.new(host: "smtp.example.com", ...)
+result = KemalAuth::PasswordReset.send_reset_email(
+  email: "user@example.com",
+  reset_url: "https://monapplication.fr/reset-password",
+  secret: ENV["SESSION_SECRET"],
+  smtp: smtp
+)
+----
+
+== Gestion des Utilisateurs
+
+[source,crystal]
+----
+errors = KemalAuth::UserManager.validate_user(
+  email: "nouveau@example.com", nom: "Dupont", prenom: "Marie", role: "admin"
+)
+KemalAuth::UserManager.send_invitation_email(
+  email: "nouveau@example.com", prenom: "Marie",
+  invitation_url: "https://monapplication.fr/set-password",
+  secret: ENV["SESSION_SECRET"], smtp: smtp
+)
+temp_pwd = KemalAuth::UserManager.generate_temp_password
+----

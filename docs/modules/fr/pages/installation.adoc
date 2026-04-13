@@ -1,0 +1,18 @@
+= Installation
+
+Ajouter dans votre `shard.yml` :
+
+[source,yaml]
+----
+dependencies:
+  kemal-auth:
+    github: aloli-crystal/kemal-auth
+    version: "~> 0.1"
+----
+
+Puis executer :
+
+[source,bash]
+----
+shards install
+----

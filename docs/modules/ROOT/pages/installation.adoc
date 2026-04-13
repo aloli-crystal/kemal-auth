@@ -1,0 +1,24 @@
+= Installation
+
+Add to your `shard.yml`:
+
+[source,yaml]
+----
+dependencies:
+  kemal-auth:
+    github: aloli-crystal/kemal-auth
+    version: "~> 0.1"
+----
+
+Then run:
+
+[source,bash]
+----
+shards install
+----
+
+== Dependencies
+
+* https://github.com/jgaskins/bcrypt[bcrypt] -- password hashing
+* https://github.com/arcage/crystal-email[crystal-email] (~> 0.6) -- email sending
+* https://github.com/crystal-community/jwt[jwt] (~> 1.6) -- JWT tokens

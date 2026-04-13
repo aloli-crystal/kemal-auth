@@ -1,0 +1,6 @@
+name: kemal-auth
+title: 'Kemal Auth'
+version: '0.1.0'
+nav:
+  - modules/ROOT/nav.adoc
+  - modules/fr/nav.adoc
