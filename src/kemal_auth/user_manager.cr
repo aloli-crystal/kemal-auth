@@ -81,10 +81,10 @@ module KemalAuth
           message = EMail::Message.new
           # from(adresse, nom?) : deux arguments séparés — la librairie EMail refuse "Nom <addr>"
           from_display = if smtp.from_name.strip.empty? || smtp.from_name.includes?("@")
-            nil
-          else
-            smtp.from_name.strip
-          end
+                           nil
+                         else
+                           smtp.from_name.strip
+                         end
           message.from(smtp.from_address.strip, from_display)
           message.message(body_text)
           message.message_html(body_html)
